@@ -58,6 +58,8 @@
         <button onclick="switchModel('https://modelviewer.dev/shared-assets/models/Astronaut.glb', 'https://modelviewer.dev/shared-assets/models/Astronaut.usdz')">Astronaut</button>
         <button onclick="switchModel('https://modelviewer.dev/shared-assets/models/Horse.glb', 'https://modelviewer.dev/shared-assets/models/Horse.usdz')">Horse</button>
         <button onclick="switchModel('https://modelviewer.dev/shared-assets/models/RobotExpressive.glb', 'https://modelviewer.dev/shared-assets/models/RobotExpressive.usdz')">Robot</button>
+        <button id="ar-button" onclick="startAR()" style="margin-top: 10px;">Enter AR</button>
+
     </div>
     </model-viewer>
 
@@ -65,8 +67,7 @@
    
 
     <!-- AR Button (optional) for manual control -->
-    <button id="ar-button" onclick="startAR()" style="margin-top: 10px;">Enter AR</button>
-
+    
     <script>
         // Function to switch model by changing the 'src' attribute of model-viewer for both glb and usdz
         function switchModel(modelUrl, iosUrl) {
