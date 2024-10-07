@@ -104,20 +104,18 @@
             }
         });
     </script>
-    <script src="https://apps.8thwall.com/xrweb"></script>
+    <script src="https://onirix.com/sdk.js"></script>
 <script>
-  // Initialize 8th Wall AR session
-  XR8.addCameraPipelineModules([
-    XR8.GlTextureRenderer.pipelineModule(),  // Add camera feed
-    XR8.FacePipelineModules.faceController() // 8th Wall AR module
-  ]);
-
-  // Trigger AR mode
+  // Initialize Onirix AR when user enters AR mode
   function enterAR() {
-    XR8.run({ canvas: document.getElementById('canvas') });
+    // Assuming Onirix has been properly initialized
+    OnirixAR.startSession({
+      model: 'https://modelviewer.dev/shared-assets/models/Astronaut.glb',
+      // Other Onirix AR parameters
+    });
   }
 
-  document.querySelector("model-viewer").addEventListener("click", enterAR);
+  document.getElementById("myModel").addEventListener("click", enterAR);
 </script>
 
 </body>
