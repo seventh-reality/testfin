@@ -16,6 +16,7 @@
             color: white;
             cursor: pointer;
             font-size: 18px;
+            display: none; /* Hidden by default, will be shown if AR is supported */
         }
     </style>
 </head>
@@ -35,6 +36,17 @@
         let hitTestSource = null;
         let hitTestSourceRequested = false;
         const arButton = document.getElementById('ar-button');
+
+        // Check if WebXR is available and show AR button if supported
+        if (navigator.xr) {
+            navigator.xr.isSessionSupported('immersive-ar').then((supported) => {
+                if (supported) {
+                    arButton.style.display = 'block';  // Show button if AR is supported
+                }
+            });
+        } else {
+            alert('WebXR not supported on this device or browser.');
+        }
 
         // Initialize the 3D scene and WebXR environment
         function init() {
@@ -74,7 +86,11 @@
 
             // AR button handler to initiate AR session
             arButton.addEventListener('click', () => {
-                navigator.xr.requestSession('immersive-ar', { requiredFeatures: ['hit-test'] }).then(onSessionStarted);
+                navigator.xr.requestSession('immersive-ar', { requiredFeatures: ['hit-test'] })
+                    .then(onSessionStarted)
+                    .catch((err) => {
+                        console.error('Failed to start AR session', err);
+                    });
             });
 
             window.addEventListener('resize', onWindowResize);
