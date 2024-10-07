@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Model Viewer Augmented Reality</title>
-    <script type="module" src="model-viewer.min.js"></script>
+    <script type="module" src="https://cdn.jsdelivr.net/npm/@google/model-viewer/dist/model-viewer.min.js"></script>
     <style>
         body {
             margin: 0;
@@ -45,35 +45,30 @@
         src="https://modelviewer.dev/shared-assets/models/Astronaut.glb" 
         alt="A 3D model of an astronaut"
         ar 
-        ar-modes="webxr scene-viewer quick-look"
-        ios-src="https://modelviewer.dev/shared-assets/models/Astronaut.usdz" 
+        ar-modes="webxr scene-viewer"  <!-- Removed ios-src to disable Quick Look -->
         environment-image="https://modelviewer.dev/shared-assets/environments/spruit_sunrise_1k_HDR.hdr"
         skybox-image="https://modelviewer.dev/shared-assets/environments/spruit_sunrise_1k_HDR.hdr"
         camera-controls 
         auto-rotate 
         ar-scale="auto"
         ar-placement="floor"
-        id="model-viewer"
-         <div class="button-container">
-        <button onclick="switchModel('https://modelviewer.dev/shared-assets/models/Astronaut.glb', 'https://modelviewer.dev/shared-assets/models/Astronaut.usdz')">Astronaut</button>
-        <button onclick="switchModel('https://modelviewer.dev/shared-assets/models/Horse.glb', 'https://modelviewer.dev/shared-assets/models/Horse.usdz')">Horse</button>
-        <button onclick="switchModel('https://modelviewer.dev/shared-assets/models/RobotExpressive.glb', 'https://modelviewer.dev/shared-assets/models/RobotExpressive.usdz')">Robot</button>
-        <button id="ar-button" onclick="startAR()" style="margin-top: 10px;">Enter AR</button>
-
-    </div>
+        id="model-viewer">
     </model-viewer>
 
     <!-- Button container for model switching -->
-   
+    <div class="button-container">
+        <button onclick="switchModel('https://modelviewer.dev/shared-assets/models/Astronaut.glb')">Astronaut</button>
+        <button onclick="switchModel('https://modelviewer.dev/shared-assets/models/Horse.glb')">Horse</button>
+        <button onclick="switchModel('https://modelviewer.dev/shared-assets/models/RobotExpressive.glb')">Robot</button>
+        <button id="ar-button" onclick="startAR()" style="margin-top: 10px;">Enter AR</button>
+    </div>
 
-    <!-- AR Button (optional) for manual control -->
-    
+    <!-- Optional AR Button Handling -->
     <script>
-        // Function to switch model by changing the 'src' attribute of model-viewer for both glb and usdz
-        function switchModel(modelUrl, iosUrl) {
+        // Function to switch models by changing the 'src' attribute of model-viewer
+        function switchModel(modelUrl) {
             const modelViewer = document.querySelector('#model-viewer');
             modelViewer.src = modelUrl;
-            modelViewer.iosSrc = iosUrl; // Ensuring iOS gets the USDZ format
         }
 
         // Trigger AR mode programmatically
