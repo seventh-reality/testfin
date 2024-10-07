@@ -10,32 +10,39 @@
             margin: 0;
             padding: 0;
             display: flex;
-            justify-content: center;
+            flex-direction: column;
             align-items: center;
             height: 100vh;
             background-color: #f0f0f0;
         }
         model-viewer {
             width: 100%;
-            height: 100%;
+            height: 80vh; /* Adjust height for buttons */
         }
-        #ar-button {
-            position: absolute;
-            top: 10px;
-            left: 10px;
+        .button-container {
+            display: flex;
+            justify-content: center;
+            margin-top: 10px;
+        }
+        button {
+            margin: 0 10px;
+            padding: 10px;
             background-color: #007bff;
             color: white;
             border: none;
-            padding: 10px;
             cursor: pointer;
             font-size: 18px;
+        }
+        button:hover {
+            background-color: #0056b3;
         }
     </style>
 </head>
 <body>
 
+    <!-- Model Viewer -->
     <model-viewer 
-        src="https://modelviewer.dev/shared-assets/models/Astronaut.glb"
+        src="https://modelviewer.dev/shared-assets/models/Astronaut.glb"  <!-- Default model -->
         alt="A 3D model of an astronaut"
         ar 
         ar-modes="webxr scene-viewer quick-look"
@@ -45,13 +52,26 @@
         auto-rotate 
         ar-scale="auto"
         ar-placement="floor"
-        id="astronaut-model">
+        id="model-viewer">
     </model-viewer>
 
+    <!-- Button container for model switching -->
+    <div class="button-container">
+        <button onclick="switchModel('https://modelviewer.dev/shared-assets/models/Astronaut.glb')">Astronaut</button>
+        <button onclick="switchModel('https://modelviewer.dev/shared-assets/models/Horse.glb')">Horse</button>
+        <button onclick="switchModel('https://modelviewer.dev/shared-assets/models/RobotExpressive.glb')">Robot</button>
+    </div>
+
     <!-- AR Button (optional) for manual control -->
-    <button id="ar-button" onclick="startAR()">Enter AR</button>
+    <button id="ar-button" onclick="startAR()" style="margin-top: 10px;">Enter AR</button>
 
     <script>
+        // Function to switch model by changing the 'src' attribute of model-viewer
+        function switchModel(modelUrl) {
+            const modelViewer = document.querySelector('#model-viewer');
+            modelViewer.src = modelUrl;
+        }
+
         // Trigger AR mode programmatically
         function startAR() {
             const modelViewer = document.querySelector('model-viewer');
