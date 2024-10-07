@@ -36,6 +36,11 @@
         button:hover {
             background-color: #0056b3;
         }
+        #ar-button {
+            display: flex;
+            margin-top: 10px;
+            background-color: #28a745;
+        }
     </style>
 </head>
 <body>
@@ -54,26 +59,26 @@
         ar-scale="auto"
         ar-placement="floor"
         id="model-viewer"
-         <div class="button-container">
+        <div class="button-container">
         <button onclick="switchModel('https://modelviewer.dev/shared-assets/models/Astronaut.glb', 'https://modelviewer.dev/shared-assets/models/Astronaut.usdz')">Astronaut</button>
         <button onclick="switchModel('https://modelviewer.dev/shared-assets/models/Horse.glb', 'https://modelviewer.dev/shared-assets/models/Horse.usdz')">Horse</button>
         <button onclick="switchModel('https://modelviewer.dev/shared-assets/models/RobotExpressive.glb', 'https://modelviewer.dev/shared-assets/models/RobotExpressive.usdz')">Robot</button>
-        <button id="ar-button" onclick="startAR()" style="margin-top: 10px;">Enter AR</button>
+        <button id="ar-button" onclick="startAR()">Enter AR</button>
+       </div>
 
-    </div>
     </model-viewer>
 
     <!-- Button container for model switching -->
+    
+    <!-- AR Button -->
    
 
-    <!-- AR Button (optional) for manual control -->
-    
     <script>
         // Function to switch model by changing the 'src' attribute of model-viewer for both glb and usdz
         function switchModel(modelUrl, iosUrl) {
             const modelViewer = document.querySelector('#model-viewer');
             modelViewer.src = modelUrl;
-            modelViewer.iosSrc = iosUrl; // Ensuring iOS gets the USDZ format
+            modelViewer.iosSrc = iosUrl; // Ensure iOS gets the USDZ format
         }
 
         // Trigger AR mode programmatically
@@ -84,19 +89,19 @@
                 // Check if the model viewer can activate AR
                 modelViewer.activateAR();
             } else {
-                alert('AR mode not supported or not ready.');
+                alert('AR mode is not supported or not ready.');
             }
         }
 
-        // For Safari iOS to handle AR UI activation properly
+        // Ensure the AR button is displayed properly on iOS and Android
         document.addEventListener('DOMContentLoaded', function() {
             const modelViewer = document.querySelector('#model-viewer');
 
             // Ensure that model-viewer is supported before showing AR button
             if (modelViewer.canActivateAR) {
-                document.getElementById('ar-button').style.display = 'block';  // Display the button only if AR is supported
+                document.getElementById('ar-button').style.display = 'block';  // Display the button if AR is supported
             } else {
-                document.getElementById('ar-button').style.display = 'none';  // Hide button if AR is not available
+                document.getElementById('ar-button').style.display = 'none';  // Hide the AR button if AR is not available
             }
         });
     </script>
