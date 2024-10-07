@@ -37,7 +37,6 @@
             background-color: #0056b3;
         }
         #ar-button {
-            display: flex;
             margin-top: 10px;
             background-color: #28a745;
         }
@@ -63,15 +62,14 @@
         <button onclick="switchModel('https://modelviewer.dev/shared-assets/models/Astronaut.glb', 'https://modelviewer.dev/shared-assets/models/Astronaut.usdz')">Astronaut</button>
         <button onclick="switchModel('https://modelviewer.dev/shared-assets/models/Horse.glb', 'https://modelviewer.dev/shared-assets/models/Horse.usdz')">Horse</button>
         <button onclick="switchModel('https://modelviewer.dev/shared-assets/models/RobotExpressive.glb', 'https://modelviewer.dev/shared-assets/models/RobotExpressive.usdz')">Robot</button>
-        <button id="ar-button" onclick="startAR()">Enter AR</button>
-       </div>
+    </div>
 
     </model-viewer>
 
     <!-- Button container for model switching -->
     
     <!-- AR Button -->
-   
+    <button id="ar-button" onclick="startAR()">Enter AR</button>
 
     <script>
         // Function to switch model by changing the 'src' attribute of model-viewer for both glb and usdz
@@ -93,15 +91,25 @@
             }
         }
 
-        // Ensure the AR button is displayed properly on iOS and Android
+        // Fallback detection for iOS Safari to handle AR UI issue
+        function isIOS() {
+            return /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+        }
+
+        // Adjust UI for iOS Safari if Quick Look is used
         document.addEventListener('DOMContentLoaded', function() {
             const modelViewer = document.querySelector('#model-viewer');
 
             // Ensure that model-viewer is supported before showing AR button
-            if (modelViewer.canActivateAR) {
-                document.getElementById('ar-button').style.display = 'block';  // Display the button if AR is supported
+            if (isIOS() && !modelViewer.canActivateAR) {
+                document.getElementById('ar-button').textContent = 'View in AR (Quick Look)';
+            }
+
+            // Display AR button if supported
+            if (modelViewer.canActivateAR || isIOS()) {
+                document.getElementById('ar-button').style.display = 'block';
             } else {
-                document.getElementById('ar-button').style.display = 'none';  // Hide the AR button if AR is not available
+                document.getElementById('ar-button').style.display = 'none';
             }
         });
     </script>
