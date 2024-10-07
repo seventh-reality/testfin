@@ -104,6 +104,21 @@
             }
         });
     </script>
+    <script src="https://apps.8thwall.com/xrweb"></script>
+<script>
+  // Initialize 8th Wall AR session
+  XR8.addCameraPipelineModules([
+    XR8.GlTextureRenderer.pipelineModule(),  // Add camera feed
+    XR8.FacePipelineModules.faceController() // 8th Wall AR module
+  ]);
+
+  // Trigger AR mode
+  function enterAR() {
+    XR8.run({ canvas: document.getElementById('canvas') });
+  }
+
+  document.querySelector("model-viewer").addEventListener("click", enterAR);
+</script>
 
 </body>
 </html>
