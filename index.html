@@ -1,122 +1,64 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Model Viewer Augmented Reality</title>
-    <script type="module" src="model-viewer.min.js"></script>
-    <style>
-        body {
-            margin: 0;
-            padding: 0;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            height: 100vh;
-            background-color: #f0f0f0;
-        }
-        model-viewer {
-            width: 100%;
-            height: 80vh; /* Adjust height for buttons */
-        }
-        .button-container {
-            display: flex;
-            justify-content: center;
-            margin-top: 10px;
-        }
-        button {
-            display: flex;
-            margin: 0 10px;
-            padding: 10px;
-            background-color: #007bff;
-            color: white;
-            border: none;
-            cursor: pointer;
-            font-size: 18px;
-        }
-        button:hover {
-            background-color: #0056b3;
-        }
-        #ar-button {
-            display: flex;
-            margin-top: 10px;
-            background-color: #28a745;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WebAR without Markers</title>
+
+  <!-- Include Three.js and Three.ar.js -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://unpkg.com/three.ar.js"></script>
+  
+  <!-- Include model-viewer -->
+  <script src="https://cdn.jsdelivr.net/npm/@google/model-viewer/dist/model-viewer.min.js"></script>
+
+  <style>
+    body, html { margin: 0; overflow: hidden; }
+    canvas { display: block; }
+  </style>
 </head>
 <body>
 
-    <!-- Model Viewer -->
-    <model-viewer 
-        src="https://modelviewer.dev/shared-assets/models/Astronaut.glb" 
-        alt="A 3D model of an astronaut"
-        ar ar-modes="webxr"
-        environment-image="https://modelviewer.dev/shared-assets/environments/spruit_sunrise_1k_HDR.hdr"
-        skybox-image="https://modelviewer.dev/shared-assets/environments/spruit_sunrise_1k_HDR.hdr"
-        camera-controls 
-        auto-rotate 
-        ar-scale="auto"
-        ar-placement="floor"
-        id="model-viewer"
-        <div class="button-container">
-        <button onclick="switchModel('https://modelviewer.dev/shared-assets/models/Astronaut.glb', 'https://modelviewer.dev/shared-assets/models/Astronaut.usdz')">Astronaut</button>
-        <button onclick="switchModel('https://modelviewer.dev/shared-assets/models/Horse.glb', 'https://modelviewer.dev/shared-assets/models/Horse.usdz')">Horse</button>
-        <button onclick="switchModel('https://modelviewer.dev/shared-assets/models/RobotExpressive.glb', 'https://modelviewer.dev/shared-assets/models/RobotExpressive.usdz')">Robot</button>
-        <button id="ar-button" onclick="startAR()">Enter AR</button>
-       </div>
+  <!-- Basic 3D Viewer -->
+  <model-viewer id="modelViewer" src="https://modelviewer.dev/shared-assets/models/Astronaut.glb" alt="A 3D model" camera-controls></model-viewer>
 
-    </model-viewer>
+  <script>
+    // Setup three.ar.js for markerless AR
+    let scene, camera, renderer;
 
-    <!-- Button container for model switching -->
-    
-    <!-- AR Button -->
-   
+    function initAR() {
+      // Create a scene
+      scene = new THREE.Scene();
 
-    <script>
-        // Function to switch model by changing the 'src' attribute of model-viewer for both glb and usdz
-        function switchModel(modelUrl, iosUrl) {
-            const modelViewer = document.querySelector('#model-viewer');
-            modelViewer.src = modelUrl;
-            modelViewer.iosSrc = iosUrl; // Ensure iOS gets the USDZ format
-        }
+      // Set up the camera
+      camera = new THREE.Camera();
+      scene.add(camera);
 
-        // Trigger AR mode programmatically
-        function startAR() {
-            const modelViewer = document.querySelector('#model-viewer');
+      // Set up the renderer
+      renderer = new THREE.WebGLRenderer({ alpha: true });
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      document.body.appendChild(renderer.domElement);
 
-            if (modelViewer.canActivateAR) {
-                // Check if the model viewer can activate AR
-                modelViewer.activateAR();
-            } else {
-                alert('AR mode is not supported or not ready.');
-            }
-        }
+      // Load the GLTF model from model-viewer into Three.js
+      const loader = new THREE.GLTFLoader();
+      loader.load('https://modelviewer.dev/shared-assets/models/Astronaut.glb', (gltf) => {
+        const model = gltf.scene;
+        model.scale.set(0.1, 0.1, 0.1);
+        scene.add(model);
+      });
 
-        // Ensure the AR button is displayed properly on iOS and Android
-        document.addEventListener('DOMContentLoaded', function() {
-            const modelViewer = document.querySelector('#model-viewer');
+      // Initialize AR session
+      const arDisplay = new THREE.ARDisplay();
+      arDisplay.requestAnimationFrame(renderAR);
+    }
 
-            // Ensure that model-viewer is supported before showing AR button
-            if (modelViewer.canActivateAR) {
-                document.getElementById('ar-button').style.display = 'flex';  // Display the button if AR is supported
-            } else {
-                document.getElementById('ar-button').style.display = 'flex';  // Hide the AR button if AR is not available
-            }
-        });
-    </script>
-    <script src="https://onirix.com/sdk.js"></script>
-<script>
-  // Initialize Onirix AR when user enters AR mode
-  function enterAR() {
-    // Assuming Onirix has been properly initialized
-    OnirixAR.startSession({
-      model: 'https://modelviewer.dev/shared-assets/models/Astronaut.glb',
-      // Other Onirix AR parameters
-    });
-  }
+    function renderAR(timestamp) {
+      renderer.render(scene, camera);
+      arDisplay.requestAnimationFrame(renderAR);
+    }
 
-  document.getElementById("myModel").addEventListener("click", enterAR);
-</script>
-
+    // Start AR on click
+    document.querySelector('model-viewer').addEventListener('click', initAR);
+  </script>
 </body>
 </html>
