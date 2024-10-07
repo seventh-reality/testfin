@@ -3,14 +3,13 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>WebAR without Markers</title>
+  <title>Markerless WebAR with WebXR Polyfill</title>
 
-  <!-- Include Three.js and Three.ar.js -->
+  <!-- Include WebXR Polyfill -->
+  <script src="https://cdn.jsdelivr.net/npm/webxr-polyfill@latest/build/webxr-polyfill.min.js"></script>
+
+  <!-- Include Three.js -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-  <script src="https://unpkg.com/three.ar.js"></script>
-  
-  <!-- Include model-viewer -->
-  <script src="https://cdn.jsdelivr.net/npm/@google/model-viewer/dist/model-viewer.min.js"></script>
 
   <style>
     body, html { margin: 0; overflow: hidden; }
@@ -19,46 +18,43 @@
 </head>
 <body>
 
-  <!-- Basic 3D Viewer -->
-  <model-viewer id="modelViewer" src="https://modelviewer.dev/shared-assets/models/Astronaut.glb" alt="A 3D model" camera-controls></model-viewer>
-
   <script>
-    // Setup three.ar.js for markerless AR
-    let scene, camera, renderer;
+    let scene, camera, renderer, model;
 
-    function initAR() {
-      // Create a scene
+    // Initialize Three.js for markerless AR
+    function init() {
       scene = new THREE.Scene();
 
-      // Set up the camera
-      camera = new THREE.Camera();
-      scene.add(camera);
+      camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.1, 1000);
+      camera.position.z = 5;
 
-      // Set up the renderer
       renderer = new THREE.WebGLRenderer({ alpha: true });
       renderer.setSize(window.innerWidth, window.innerHeight);
       document.body.appendChild(renderer.domElement);
 
-      // Load the GLTF model from model-viewer into Three.js
+      // Load GLTF model
       const loader = new THREE.GLTFLoader();
       loader.load('https://modelviewer.dev/shared-assets/models/Astronaut.glb', (gltf) => {
-        const model = gltf.scene;
+        model = gltf.scene;
         model.scale.set(0.1, 0.1, 0.1);
         scene.add(model);
       });
 
-      // Initialize AR session
-      const arDisplay = new THREE.ARDisplay();
-      arDisplay.requestAnimationFrame(renderAR);
+      renderer.setAnimationLoop(animate);
     }
 
-    function renderAR(timestamp) {
+    // Animate the AR scene
+    function animate() {
+      if (model) {
+        model.rotation.y += 0.01;  // Rotate the model
+      }
       renderer.render(scene, camera);
-      arDisplay.requestAnimationFrame(renderAR);
     }
 
-    // Start AR on click
-    document.querySelector('model-viewer').addEventListener('click', initAR);
+    // Start AR when user interacts
+    document.body.addEventListener('click', () => {
+      init();
+    });
   </script>
 </body>
 </html>
