@@ -3,13 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Model Viewer + AR.js Three.js AR (Markerless)</title>
+    <title>Model Viewer Augmented Reality</title>
     <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
-    <!-- AR.js and Three.js libraries for Safari fallback -->
-    <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
-    <script src="https://cdn.rawgit.com/jeromeetienne/ar.js/master/aframe/build/aframe-ar.js"></script>
-    <script src="https://threejs.org/build/three.js"></script>
-
     <style>
         body {
             margin: 0;
@@ -22,7 +17,7 @@
         }
         model-viewer {
             width: 100%;
-            height: 60vh;
+            height: 80vh; /* Adjust height for buttons */
         }
         .button-container {
             display: flex;
@@ -42,106 +37,71 @@
             background-color: #0056b3;
         }
         #ar-button {
+            display: flex;
             margin-top: 10px;
             background-color: #28a745;
-        }
-        #fallback-container {
-            display: none; /* Hidden initially, displayed only for iOS Safari */
-        }
-        #threejs-canvas {
-            width: 100%;
-            height: 60vh;
         }
     </style>
 </head>
 <body>
 
-    <!-- Model Viewer for WebXR and AR Quick Look -->
+    <!-- Model Viewer -->
     <model-viewer 
-        id="model-viewer" 
         src="https://modelviewer.dev/shared-assets/models/Astronaut.glb" 
-        ios-src="https://modelviewer.dev/shared-assets/models/Astronaut.usdz"
-        alt="A 3D model of an astronaut" 
+        alt="A 3D model of an astronaut"
         ar 
-        ar-modes="webxr scene-viewer quick-look" 
+        ar-modes="webxr scene-viewer quick-look"
+        ios-src="https://modelviewer.dev/shared-assets/models/Astronaut.usdz" 
         environment-image="https://modelviewer.dev/shared-assets/environments/spruit_sunrise_1k_HDR.hdr"
+        skybox-image="https://modelviewer.dev/shared-assets/environments/spruit_sunrise_1k_HDR.hdr"
         camera-controls 
-        auto-rotate
+        auto-rotate 
+        ar-scale="auto"
         ar-placement="floor"
-        style="display: none;">
-    </model-viewer>
-
-    <!-- Button container for model switching -->
-    <div class="button-container">
+        id="model-viewer"
+        <div class="button-container">
         <button onclick="switchModel('https://modelviewer.dev/shared-assets/models/Astronaut.glb', 'https://modelviewer.dev/shared-assets/models/Astronaut.usdz')">Astronaut</button>
         <button onclick="switchModel('https://modelviewer.dev/shared-assets/models/Horse.glb', 'https://modelviewer.dev/shared-assets/models/Horse.usdz')">Horse</button>
         <button onclick="switchModel('https://modelviewer.dev/shared-assets/models/RobotExpressive.glb', 'https://modelviewer.dev/shared-assets/models/RobotExpressive.usdz')">Robot</button>
-    </div>
+        <button id="ar-button" onclick="startAR()">Enter AR</button>
+       </div>
 
+    </model-viewer>
+
+    <!-- Button container for model switching -->
+    
     <!-- AR Button -->
-    <button id="ar-button" onclick="startAR()">Enter AR</button>
-
-    <!-- Fallback for Safari (iOS) using AR.js and Three.js without markers -->
-    <div id="fallback-container">
-        <a-scene embedded arjs="sourceType: webcam; debugUIEnabled: false;" xrweb>
-            <a-entity id="threejs-canvas" position="0 0 0" scale="0.5 0.5 0.5" rotation="0 0 0" model-viewer-src="https://modelviewer.dev/shared-assets/models/Astronaut.glb" 
-                gltf-model="https://modelviewer.dev/shared-assets/models/Astronaut.glb" 
-                scale="0.5 0.5 0.5">
-            </a-entity>
-            <a-entity camera></a-entity>
-        </a-scene>
-    </div>
+   
 
     <script>
-        // Function to switch model in Model Viewer
+        // Function to switch model by changing the 'src' attribute of model-viewer for both glb and usdz
         function switchModel(modelUrl, iosUrl) {
             const modelViewer = document.querySelector('#model-viewer');
             modelViewer.src = modelUrl;
             modelViewer.iosSrc = iosUrl; // Ensure iOS gets the USDZ format
         }
 
-        // Detect iOS and Safari browsers
-        function isIOS() {
-            return /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
-        }
-
-        function isSafari() {
-            return /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
-        }
-
-        // Start AR mode for Android (WebXR) or iOS (fallback AR.js)
+        // Trigger AR mode programmatically
         function startAR() {
             const modelViewer = document.querySelector('#model-viewer');
-            const arButton = document.getElementById('ar-button');
 
-            if (isIOS() && isSafari()) {
-                // Fallback to AR.js for Safari on iOS without markers
-                document.getElementById('model-viewer').style.display = 'none';
-                document.getElementById('fallback-container').style.display = 'block';
-                arButton.style.display = 'none';
+            if (modelViewer.canActivateAR) {
+                // Check if the model viewer can activate AR
+                modelViewer.activateAR();
             } else {
-                // Android browsers use WebXR or Scene Viewer
-                if (modelViewer.canActivateAR) {
-                    modelViewer.activateAR();
-                } else {
-                    alert('AR mode is not supported or not ready.');
-                }
+                alert('AR mode is not supported or not ready.');
             }
         }
 
-        // Show AR button and enable correct display based on browser support
+        // Ensure the AR button is displayed properly on iOS and Android
         document.addEventListener('DOMContentLoaded', function() {
             const modelViewer = document.querySelector('#model-viewer');
-            const arButton = document.getElementById('ar-button');
 
-            // Adjust UI for iOS Safari if Quick Look or fallback is used
-            if (isIOS() && isSafari()) {
-                arButton.textContent = 'Enter AR (AR.js)';
-                modelViewer.style.display = 'none';
-                document.getElementById('fallback-container').style.display = 'block';
+            // Ensure that model-viewer is supported before showing AR button
+            if (modelViewer.canActivateAR) {
+                document.getElementById('ar-button').style.display = 'block';  // Display the button if AR is supported
             } else {
-                arButton.style.display = 'block';
-                modelViewer.style.display = 'block';
+                document.getElementById('ar-button').style.display = 'none';  // Hide the AR button if AR is not available
             }
         });
     </script>
