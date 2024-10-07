@@ -54,7 +54,7 @@
         ar-scale="auto"
         ar-placement="floor"
         id="model-viewer"
-          <div class="button-container">
+         <div class="button-container">
         <button onclick="switchModel('https://modelviewer.dev/shared-assets/models/Astronaut.glb', 'https://modelviewer.dev/shared-assets/models/Astronaut.usdz')">Astronaut</button>
         <button onclick="switchModel('https://modelviewer.dev/shared-assets/models/Horse.glb', 'https://modelviewer.dev/shared-assets/models/Horse.usdz')">Horse</button>
         <button onclick="switchModel('https://modelviewer.dev/shared-assets/models/RobotExpressive.glb', 'https://modelviewer.dev/shared-assets/models/RobotExpressive.usdz')">Robot</button>
@@ -62,7 +62,7 @@
     </model-viewer>
 
     <!-- Button container for model switching -->
-  
+   
 
     <!-- AR Button (optional) for manual control -->
     <button id="ar-button" onclick="startAR()" style="margin-top: 10px;">Enter AR</button>
@@ -78,8 +78,26 @@
         // Trigger AR mode programmatically
         function startAR() {
             const modelViewer = document.querySelector('#model-viewer');
-            modelViewer.activateAR();
+
+            if (modelViewer.canActivateAR) {
+                // Check if the model viewer can activate AR
+                modelViewer.activateAR();
+            } else {
+                alert('AR mode not supported or not ready.');
+            }
         }
+
+        // For Safari iOS to handle AR UI activation properly
+        document.addEventListener('DOMContentLoaded', function() {
+            const modelViewer = document.querySelector('#model-viewer');
+
+            // Ensure that model-viewer is supported before showing AR button
+            if (modelViewer.canActivateAR) {
+                document.getElementById('ar-button').style.display = 'block';  // Display the button only if AR is supported
+            } else {
+                document.getElementById('ar-button').style.display = 'none';  // Hide button if AR is not available
+            }
+        });
     </script>
 
 </body>
