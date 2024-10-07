@@ -20,118 +20,128 @@
     </style>
 </head>
 <body>
+
+    <!-- AR Button to initiate AR session -->
     <button id="ar-button">Enter AR</button>
+
+    <!-- Three.js and WebXR-related scripts -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r136/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@webxr-input-profiles/motion-controllers@0.10.0/dist/motion-controllers.module.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three/examples/js/loaders/GLTFLoader.js"></script>
+
     <script>
-    let scene, camera, renderer;
-    let model, reticle;
-    let hitTestSource = null;
-    let hitTestSourceRequested = false;
-    const arButton = document.getElementById('ar-button');
+        let scene, camera, renderer;
+        let model, reticle;
+        let hitTestSource = null;
+        let hitTestSourceRequested = false;
+        const arButton = document.getElementById('ar-button');
 
-    // Initialize Three.js and WebXR
-    function init() {
-        // Create scene and camera
-        scene = new THREE.Scene();
-        camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-        
-        // Setup WebGL renderer with XR support
-        renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-        renderer.setSize(window.innerWidth, window.innerHeight);
-        renderer.xr.enabled = true;
-        document.body.appendChild(renderer.domElement);
+        // Initialize the 3D scene and WebXR environment
+        function init() {
+            // Create Three.js scene
+            scene = new THREE.Scene();
 
-        // Add lighting
-        const light = new THREE.HemisphereLight(0xffffff, 0xbbbbff, 1);
-        scene.add(light);
+            // Create camera
+            camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
 
-        // Load a 3D model (GLTF/GLB)
-        const loader = new THREE.GLTFLoader();
-        loader.load('path/to/your/model.gltf', (gltf) => {
-            model = gltf.scene;
-            model.visible = false;  // Hide model initially
-            scene.add(model);
-        });
+            // Setup WebGL renderer with XR support
+            renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.xr.enabled = true;
+            document.body.appendChild(renderer.domElement);
 
-        // Create a reticle to show where the model can be placed
-        reticle = new THREE.Mesh(
-            new THREE.RingGeometry(0.1, 0.15, 32).rotateX(- Math.PI / 2),
-            new THREE.MeshBasicMaterial({ color: 0x00ff00 })
-        );
-        reticle.matrixAutoUpdate = false;
-        reticle.visible = false;
-        scene.add(reticle);
+            // Add hemisphere lighting for model visibility
+            const light = new THREE.HemisphereLight(0xffffff, 0xbbbbff, 1);
+            light.position.set(0.5, 1, 0.25);
+            scene.add(light);
 
-        // Handle AR button click to initiate AR session
-        arButton.addEventListener('click', () => {
-            navigator.xr.requestSession('immersive-ar', { requiredFeatures: ['hit-test'] }).then(onSessionStarted);
-        });
-
-        window.addEventListener('resize', onWindowResize);
-    }
-
-    // When AR session starts
-    function onSessionStarted(session) {
-        renderer.xr.setSession(session);
-
-        // Request hit-test source
-        session.requestReferenceSpace('local').then((referenceSpace) => {
-            session.requestHitTestSource({ space: referenceSpace }).then((source) => {
-                hitTestSource = source;
+            // Load a 3D model (GLTF/GLB format)
+            const loader = new THREE.GLTFLoader();
+            loader.load('https://modelviewer.dev/shared-assets/models/Astronaut.glb', (gltf) => {
+                model = gltf.scene;
+                model.visible = false;  // Hide the model initially
+                scene.add(model);
             });
-        });
 
-        session.addEventListener('end', onSessionEnded);
-        session.addEventListener('select', onSelect);  // Select handler to place model
+            // Create a reticle (circle) to show where the model will be placed
+            reticle = new THREE.Mesh(
+                new THREE.RingGeometry(0.15, 0.2, 32).rotateX(- Math.PI / 2),
+                new THREE.MeshBasicMaterial({ color: 0x00ff00 })
+            );
+            reticle.matrixAutoUpdate = false;
+            reticle.visible = false;
+            scene.add(reticle);
 
-        renderer.setAnimationLoop(render);
-    }
+            // AR button handler to initiate AR session
+            arButton.addEventListener('click', () => {
+                navigator.xr.requestSession('immersive-ar', { requiredFeatures: ['hit-test'] }).then(onSessionStarted);
+            });
 
-    // On AR session end
-    function onSessionEnded() {
-        hitTestSourceRequested = false;
-        hitTestSource = null;
-        renderer.setAnimationLoop(null);
-    }
-
-    // Handle resizing the window
-    function onWindowResize() {
-        camera.aspect = window.innerWidth / window.innerHeight;
-        camera.updateProjectionMatrix();
-        renderer.setSize(window.innerWidth, window.innerHeight);
-    }
-
-    // When user selects a surface (tap/click)
-    function onSelect() {
-        if (reticle.visible) {
-            model.position.setFromMatrixPosition(reticle.matrix);
-            model.visible = true;  // Show the model
+            window.addEventListener('resize', onWindowResize);
         }
-    }
 
-    // Render the scene and manage hit-test results
-    function render(timestamp, frame) {
-        if (hitTestSource && frame) {
-            const referenceSpace = renderer.xr.getReferenceSpace();
-            const hitTestResults = frame.getHitTestResults(hitTestSource);
+        // When AR session starts
+        function onSessionStarted(session) {
+            renderer.xr.setSession(session);
 
-            if (hitTestResults.length > 0) {
-                const hit = hitTestResults[0];
-                const pose = hit.getPose(referenceSpace);
+            // Request hit-test source (to detect surfaces)
+            session.requestReferenceSpace('local').then((referenceSpace) => {
+                session.requestHitTestSource({ space: referenceSpace }).then((source) => {
+                    hitTestSource = source;
+                });
+            });
 
-                reticle.visible = true;
-                reticle.matrix.fromArray(pose.transform.matrix);  // Update reticle position
-            } else {
-                reticle.visible = false;
+            session.addEventListener('end', onSessionEnded);
+            session.addEventListener('select', onSelect);  // When user taps, place model
+
+            renderer.setAnimationLoop(render);
+        }
+
+        // On AR session end
+        function onSessionEnded() {
+            hitTestSourceRequested = false;
+            hitTestSource = null;
+            renderer.setAnimationLoop(null);
+        }
+
+        // Handle window resize
+        function onWindowResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }
+
+        // When user taps, place the model at the reticle's location
+        function onSelect() {
+            if (reticle.visible) {
+                model.position.setFromMatrixPosition(reticle.matrix);
+                model.visible = true;  // Show the model
             }
         }
 
-        renderer.render(scene, camera);
-    }
+        // Render the scene and manage hit-test results (surface detection)
+        function render(timestamp, frame) {
+            if (hitTestSource && frame) {
+                const referenceSpace = renderer.xr.getReferenceSpace();
+                const hitTestResults = frame.getHitTestResults(hitTestSource);
 
-    // Initialize the application
-    init();
-</script>
+                if (hitTestResults.length > 0) {
+                    const hit = hitTestResults[0];
+                    const pose = hit.getPose(referenceSpace);
+
+                    reticle.visible = true;
+                    reticle.matrix.fromArray(pose.transform.matrix);  // Update reticle position based on surface
+                } else {
+                    reticle.visible = false;  // Hide reticle if no surface is detected
+                }
+            }
+
+            renderer.render(scene, camera);
+        }
+
+        // Initialize the scene and AR environment
+        init();
+    </script>
 
 </body>
 </html>
