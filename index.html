@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Model Viewer + AR.js Three.js AR</title>
+    <title>Model Viewer + AR.js Three.js AR (Markerless)</title>
     <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
     <!-- AR.js and Three.js libraries for Safari fallback -->
     <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
@@ -81,12 +81,13 @@
     <!-- AR Button -->
     <button id="ar-button" onclick="startAR()">Enter AR</button>
 
-    <!-- Fallback for Safari (iOS) using AR.js and Three.js -->
+    <!-- Fallback for Safari (iOS) using AR.js and Three.js without markers -->
     <div id="fallback-container">
-        <a-scene embedded arjs>
-            <a-marker preset="hiro">
-                <a-entity id="threejs-canvas" position="0 0 0" scale="0.5 0.5 0.5" rotation="0 0 0"></a-entity>
-            </a-marker>
+        <a-scene embedded arjs="sourceType: webcam; debugUIEnabled: false;" xrweb>
+            <a-entity id="threejs-canvas" position="0 0 0" scale="0.5 0.5 0.5" rotation="0 0 0" model-viewer-src="https://modelviewer.dev/shared-assets/models/Astronaut.glb" 
+                gltf-model="https://modelviewer.dev/shared-assets/models/Astronaut.glb" 
+                scale="0.5 0.5 0.5">
+            </a-entity>
             <a-entity camera></a-entity>
         </a-scene>
     </div>
@@ -114,7 +115,7 @@
             const arButton = document.getElementById('ar-button');
 
             if (isIOS() && isSafari()) {
-                // Fallback to AR.js for Safari on iOS
+                // Fallback to AR.js for Safari on iOS without markers
                 document.getElementById('model-viewer').style.display = 'none';
                 document.getElementById('fallback-container').style.display = 'block';
                 arButton.style.display = 'none';
