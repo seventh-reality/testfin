@@ -42,7 +42,7 @@
 
     <!-- Model Viewer -->
     <model-viewer 
-        src="https://modelviewer.dev/shared-assets/models/Astronaut.glb"
+        src="https://modelviewer.dev/shared-assets/models/Astronaut.glb"  <!-- Default model -->
         alt="A 3D model of an astronaut"
         ar 
         ar-modes="webxr scene-viewer quick-look"
@@ -52,16 +52,16 @@
         auto-rotate 
         ar-scale="auto"
         ar-placement="floor"
-         id="model-viewer"
-          <div class="button-container">
-        <button onclick="switchModel('https://modelviewer.dev/shared-assets/models/Astronaut.glb')">Astronaut</button>
-        <button onclick="switchModel('https://modelviewer.dev/shared-assets/models/Horse.glb')">Horse</button>
-        <button onclick="switchModel('https://modelviewer.dev/shared-assets/models/RobotExpressive.glb')">Robot</button>
-    </div>    
+        id="model-viewer">
     </model-viewer>
 
     <!-- Button container for model switching -->
-  
+    <div class="button-container">
+        <button onclick="switchModel('https://modelviewer.dev/shared-assets/models/Astronaut.glb')">Astronaut</button>
+        <button onclick="switchModel('https://modelviewer.dev/shared-assets/models/Horse.glb')">Horse</button>
+        <button onclick="switchModel('https://modelviewer.dev/shared-assets/models/RobotExpressive.glb')">Robot</button>
+    </div>
+
     <!-- AR Button (optional) for manual control -->
     <button id="ar-button" onclick="startAR()" style="margin-top: 10px;">Enter AR</button>
 
@@ -74,7 +74,7 @@
 
         // Trigger AR mode programmatically
         function startAR() {
-            const modelViewer = document.querySelector('model-viewer');
+            const modelViewer = document.querySelector('#model-viewer');
             modelViewer.activateAR();
         }
     </script>
