@@ -1,77 +1,61 @@
-<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>A-Frame AR with Surface Tracking</title>
-    
-    <!-- A-Frame Library -->
-    <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
-    
-    <!-- AR.js for A-Frame -->
-    <script src="https://rawgit.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
-    
-    <style>
-      body, html {
-        margin: 0;
-        padding: 0;
-        height: 100%;
-        overflow: hidden;
-      }
-      #arButton {
-        position: absolute;
-        bottom: 20px;
-        left: 50%;
-        transform: translateX(-50%);
-        padding: 10px 20px;
-        background-color: #007bff;
-        color: white;
-        border: none;
-        border-radius: 5px;
-        cursor: pointer;
-        font-size: 16px;
-      }
-      #arButton:hover {
-        background-color: #0056b3;
-      }
-    </style>
-  </head>
-  
-  <body>
-    <!-- A-Frame Scene with AR.js -->
-    <a-scene embedded arjs="sourceType: webcam; debugUIEnabled: false;">
-      <!-- 3D Model (GLTF or GLB) -->
-      <a-entity
-        gltf-model="https://cdn.aframe.io/test-models/models/monkey/monkey.gltf"
-        scale="0.5 0.5 0.5"
-        position="0 0 -2"
-        rotation="0 45 0">
-      </a-entity>
+<!-- Copyright (c) 2022 8th Wall, Inc. -->
+<!-- body.html is optional; elements will be added to your html body after app.js is loaded. -->
 
-      <!-- Camera -->
-      <a-entity camera></a-entity>
-    </a-scene>
+<a-scene
+  xrextras-gesture-detector
+  landing-page
+  xrextras-loading
+  xrextras-runtime-error
+  renderer="colorManagement: true"
+  xrweb="allowedDevices: any">
 
-    <!-- Button to Toggle AR -->
-    <button id="arButton">Start AR</button>
+  <!-- We can define assets here to be loaded when A-Frame initializes -->
+  <a-assets>
+    <!-- Credit to Poly by Google for the model: https://poly.google.com/view/5ZMAz7_ucTn -->
+    <a-asset-item id="sandCastleModel" src="assets/sand-castle.glb"></a-asset-item>
+  </a-assets>
 
-    <script>
-      const arButton = document.getElementById('arButton');
-      const scene = document.querySelector('a-scene');
+  <!-- The raycaster will emit mouse events on scene objects specified with the cantap class -->
+  <a-camera
+    id="camera"
+    position="0 8 8"
+    raycaster="objects: .cantap"
+    cursor="fuse: false; rayOrigin: mouse;">
+  </a-camera>
 
-      // Toggle the visibility of the A-Frame scene for AR
-      arButton.addEventListener('click', () => {
-        if (scene.style.display === 'none') {
-          scene.style.display = 'block';
-          arButton.textContent = 'Stop AR';
-        } else {
-          scene.style.display = 'none';
-          arButton.textContent = 'Start AR';
-        }
-      });
+  <a-entity
+    light="
+      type: directional;
+      intensity: 0.8;
+      castShadow: true;
+      shadowMapHeight:2048;
+      shadowMapWidth:2048;
+      shadowCameraTop: 10;
+      target: #model;
+      shadowRadius: 12"
+    xrextras-attach="target: model; offset: 1 15 3;"
+    shadow>
+  </a-entity>
 
-      // Hide the scene initially (until AR is started)
-      scene.style.display = 'none';
-    </script>
-  </body>
-</html>
+  <a-light type="ambient" intensity="0.7"></a-light>
+
+  <a-entity 
+    id="model" 
+    gltf-model="#sandCastleModel" 
+    class="cantap" 
+    xrextras-hold-drag 
+    xrextras-two-finger-rotate 
+    xrextras-pinch-scale 
+    scale="3 3 3" 
+    shadow="receive: false">
+  </a-entity>
+
+  <a-plane
+    id="ground" 
+    rotation="-90 0 0" 
+    width="1000" 
+    height="1000" 
+    material="shader: shadow" 
+    shadow>
+  </a-plane>
+</a-scene>
