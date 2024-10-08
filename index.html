@@ -46,8 +46,10 @@
     <button id="enter-ar-button">Start AR</button>
     <canvas id="xr-canvas"></canvas>
 
+    <!-- Three.js Library -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/GLTFLoader.js"></script>
+    <!-- GLTFLoader from the Three.js examples -->
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/jsm/loaders/GLTFLoader.js"></script>
 
     <script>
         let xrSession = null;
@@ -67,7 +69,7 @@
         scene.add(light);
 
         // Load GLTF model
-        const loader = new THREE.GLTFLoader();
+        const loader = new THREE.GLTFLoader(); // Correctly instantiate the GLTFLoader
         let model;
 
         loader.load('https://cdn.aframe.io/test-models/models/monkey/monkey.gltf', (gltf) => {
@@ -90,7 +92,7 @@
                     await gl.makeXRCompatible();
 
                     xrViewerSpace = await xrSession.requestReferenceSpace('viewer');
-                    const xrReferenceSpace = await xrSession.requestReferenceSpace('local-floor');
+                    await xrSession.requestReferenceSpace('local-floor');
 
                     // Create hit test source
                     xrHitTestSource = await xrSession.requestHitTestSource({ space: xrViewerSpace });
