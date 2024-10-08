@@ -1,80 +1,31 @@
-<!DOCTYPE html>
-<html lang="en">
+<!doctype html>
+<html>
   <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AR Surface Tracking with 8th Wall</title>
-    
-    <!-- A-Frame Library -->
-    <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
-    
-    <!-- 8th Wall WebAR -->
-    <script src="https://apps.8thwall.com/xrweb"></script>
-    
-    <style>
-      body, html {
-        margin: 0;
-        padding: 0;
-        height: 100%;
-        overflow: hidden;
-      }
-      #ar-button {
-        position: absolute;
-        bottom: 20px;
-        left: 50%;
-        transform: translateX(-50%);
-        padding: 10px 20px;
-        background-color: #007bff;
-        color: white;
-        border: none;
-        border-radius: 5px;
-        cursor: pointer;
-        font-size: 16px;
-      }
-      #ar-button:hover {
-        background-color: #0056b3;
-      }
-    </style>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>8th Wall Web: three.js</title>
+    <link rel="stylesheet" type="text/css" href="index.css">
+
+    <!-- THREE.js must be supplied -->
+    <script src="//cdnjs.cloudflare.com/ajax/libs/three.js/r123/three.min.js"></script>
+
+    <!-- Required to load glTF (.gltf or .glb) models -->
+    <script src="//cdn.rawgit.com/mrdoob/three.js/r123/examples/js/loaders/GLTFLoader.js"></script>
+
+    <!-- Javascript tweening engine -->
+    <script src="//cdnjs.cloudflare.com/ajax/libs/tween.js/16.3.5/Tween.min.js"></script>
+
+    <!-- XR Extras - provides utilities like load screen, almost there, and error handling.
+         See github.com/8thwall/web/tree/master/xrextras -->
+    <script src="//cdn.8thwall.com/web/xrextras/xrextras.js"></script>
+
+    <!-- 8thWall Web - Replace the app key here with your own app key -->
+    <script async src="//apps.8thwall.com/xrweb?appKey=XXXXXXXX"></script>
+
+    <!-- client code -->
+    <script src="index.js"></script>
   </head>
-  
+
   <body>
-    <!-- A-Frame Scene -->
-    <a-scene id="aframeScene" embedded>
-      <!-- 3D Model (GLTF or GLB) -->
-      <a-entity id="model" 
-                gltf-model="https://cdn.aframe.io/test-models/models/monkey/monkey.gltf"
-                scale="0.5 0.5 0.5"
-                position="0 0 -2">
-      </a-entity>
-
-      <!-- Camera -->
-      <a-camera></a-camera>
-    </a-scene>
-
-    <button id="ar-button">Start AR</button>
-
-    <script>
-      const scene = document.getElementById('aframeScene');
-      const arButton = document.getElementById('ar-button');
-
-      // Initialize 8th Wall AR on button click
-      arButton.addEventListener('click', () => {
-        XR8.addCameraPipelineModules([
-          XR8.GlTextureRenderer.pipelineModule(),   // Renders 3D content to AR
-          XR8.XrController.pipelineModule()         // Enables the AR session
-        ]);
-
-        XR8.run({
-          canvas: document.querySelector('canvas'),  // Render AR to canvas
-          apiKey: 'https://apps.8thwall.com/xrweb?appKey=6uW7WEBFQ5W2HbK3vgJAWzke54Qb5FHIA4DBTGcEoDUjeSiO0Rtea6l3KFKwi3Xk9y1FSC&s=1',               // Replace this with your actual API key
-          ownCamera: true,
-        });
-
-        scene.style.display = 'block';  // Show A-Frame scene after AR starts
-        arButton.style.display = 'none'; // Hide the AR button
-      });
-
-      scene.style.display = 'none';  // Initially hide the A-Frame scene
-    </script>
+    <canvas id="camerafeed"></canvas>
   </body>
 </html>
