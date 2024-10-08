@@ -1,31 +1,158 @@
-<!doctype html>
-<html>
-  <head>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>8th Wall Web: three.js</title>
-    <link rel="stylesheet" type="text/css" href="index.css">
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebAR with WebXR - Surface Tracking</title>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #000;
+        }
 
-    <!-- THREE.js must be supplied -->
-    <script src="//cdnjs.cloudflare.com/ajax/libs/three.js/r123/three.min.js"></script>
+        #enter-ar-button {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+            border: none;
+            border-radius: 5px;
+            z-index: 1000;
+        }
 
-    <!-- Required to load glTF (.gltf or .glb) models -->
-    <script src="//cdn.rawgit.com/mrdoob/three.js/r123/examples/js/loaders/GLTFLoader.js"></script>
+        #enter-ar-button:hover {
+            background-color: #0056b3;
+        }
 
-    <!-- Javascript tweening engine -->
-    <script src="//cdnjs.cloudflare.com/ajax/libs/tween.js/16.3.5/Tween.min.js"></script>
+        canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+    </style>
+</head>
+<body>
+    <button id="enter-ar-button">Start AR</button>
+    <canvas id="xr-canvas"></canvas>
 
-    <!-- XR Extras - provides utilities like load screen, almost there, and error handling.
-         See github.com/8thwall/web/tree/master/xrextras -->
-    <script src="//cdn.8thwall.com/web/xrextras/xrextras.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/GLTFLoader.js"></script>
 
-    <!-- 8thWall Web - Replace the app key here with your own app key -->
-    <script async src="2U1mS9QYg3CHmMPGU4v1Mp0QR2Y7viEbtpYmy9yIebS4tzM6h5M4at5mMLecAHhTwk7S70"></script>
+    <script>
+        let xrSession = null;
+        let xrCanvas = document.getElementById('xr-canvas');
+        let enterARButton = document.getElementById('enter-ar-button');
+        let xrHitTestSource = null;
+        let xrViewerSpace = null;
 
-    <!-- client code -->
-    <script src="index.js"></script>
-  </head>
+        // Create Three.js scene and camera
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ canvas: xrCanvas, alpha: true });
+        renderer.xr.enabled = true;
 
-  <body>
-    <canvas id="camerafeed"></canvas>
-  </body>
+        // Create light for the scene
+        const light = new THREE.AmbientLight(0xffffff, 1);
+        scene.add(light);
+
+        // Load GLTF model
+        const loader = new THREE.GLTFLoader();
+        let model;
+
+        loader.load('https://cdn.aframe.io/test-models/models/monkey/monkey.gltf', (gltf) => {
+            model = gltf.scene;
+            model.scale.set(0.5, 0.5, 0.5); // Scale down the model
+            scene.add(model);
+        }, undefined, (error) => {
+            console.error('Error loading model:', error);
+        });
+
+        // Start WebXR session
+        async function startXR() {
+            if (navigator.xr) {
+                try {
+                    xrSession = await navigator.xr.requestSession('immersive-ar', {
+                        requiredFeatures: ['hit-test', 'local-floor']
+                    });
+
+                    const gl = renderer.getContext();
+                    await gl.makeXRCompatible();
+
+                    xrViewerSpace = await xrSession.requestReferenceSpace('viewer');
+                    const xrReferenceSpace = await xrSession.requestReferenceSpace('local-floor');
+
+                    // Create hit test source
+                    xrHitTestSource = await xrSession.requestHitTestSource({ space: xrViewerSpace });
+
+                    xrSession.addEventListener('end', onSessionEnded);
+                    xrSession.requestAnimationFrame(onXRFrame);
+
+                    enterARButton.style.display = 'none'; // Hide the button when AR starts
+                } catch (error) {
+                    console.error('Failed to start WebXR session:', error);
+                }
+            } else {
+                alert('WebXR not supported on this device.');
+            }
+        }
+
+        // Handle AR frame rendering and hit testing
+        function onXRFrame(time, frame) {
+            const session = frame.session;
+            session.requestAnimationFrame(onXRFrame);
+            const viewerPose = frame.getViewerPose(xrViewerSpace);
+
+            if (viewerPose) {
+                const hitTestResults = frame.getHitTestResults(xrHitTestSource);
+                
+                if (hitTestResults.length > 0) {
+                    const hit = hitTestResults[0];
+                    const hitPose = hit.getPose(session.requestReferenceSpace('local-floor'));
+
+                    // Update model position based on hit test
+                    if (model) {
+                        model.position.set(
+                            hitPose.transform.position.x,
+                            hitPose.transform.position.y,
+                            hitPose.transform.position.z
+                        );
+                        model.rotation.setFromRotationMatrix(new THREE.Matrix4().fromArray(hitPose.transform.rotation));
+                    }
+                }
+            }
+
+            // Render the scene
+            renderer.render(scene, camera);
+        }
+
+        // End session handler
+        function onSessionEnded() {
+            xrSession = null;
+            enterARButton.style.display = 'block'; // Show button again after session ends
+        }
+
+        // Start AR session when the button is clicked
+        enterARButton.addEventListener('click', () => {
+            startXR();
+        });
+
+        // End the session on page unload
+        window.onbeforeunload = () => {
+            if (xrSession) {
+                xrSession.end();
+            }
+        };
+    </script>
+</body>
 </html>
