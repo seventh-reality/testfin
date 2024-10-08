@@ -1,61 +1,80 @@
-<!-- Copyright (c) 2022 8th Wall, Inc. -->
-<!-- body.html is optional; elements will be added to your html body after app.js is loaded. -->
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AR Surface Tracking with 8th Wall</title>
+    
+    <!-- A-Frame Library -->
+    <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
+    
+    <!-- 8th Wall WebAR -->
+    <script src="https://apps.8thwall.com/xrweb"></script>
+    
+    <style>
+      body, html {
+        margin: 0;
+        padding: 0;
+        height: 100%;
+        overflow: hidden;
+      }
+      #ar-button {
+        position: absolute;
+        bottom: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        padding: 10px 20px;
+        background-color: #007bff;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 16px;
+      }
+      #ar-button:hover {
+        background-color: #0056b3;
+      }
+    </style>
+  </head>
+  
+  <body>
+    <!-- A-Frame Scene -->
+    <a-scene id="aframeScene" embedded>
+      <!-- 3D Model (GLTF or GLB) -->
+      <a-entity id="model" 
+                gltf-model="https://cdn.aframe.io/test-models/models/monkey/monkey.gltf"
+                scale="0.5 0.5 0.5"
+                position="0 0 -2">
+      </a-entity>
 
-<a-scene
-  xrextras-gesture-detector
-  landing-page
-  xrextras-loading
-  xrextras-runtime-error
-  renderer="colorManagement: true"
-  xrweb="allowedDevices: any">
+      <!-- Camera -->
+      <a-camera></a-camera>
+    </a-scene>
 
-  <!-- We can define assets here to be loaded when A-Frame initializes -->
-  <a-assets>
-    <!-- Credit to Poly by Google for the model: https://poly.google.com/view/5ZMAz7_ucTn -->
-    <a-asset-item id="sandCastleModel" src="90d4862ea1a84b45b63b8a860da94956.glb"></a-asset-item>
-  </a-assets>
+    <button id="ar-button">Start AR</button>
 
-  <!-- The raycaster will emit mouse events on scene objects specified with the cantap class -->
-  <a-camera
-    id="camera"
-    position="0 8 8"
-    raycaster="objects: .cantap"
-    cursor="fuse: false; rayOrigin: mouse;">
-  </a-camera>
+    <script>
+      XR8.init({ apiKey: '//apps.8thwall.com/xrweb?appKey=n1vOTP6ZrAHeSeBYF78RphSGFqonMYP4XVsP8FQu9d9KHRquV79r4mNzmLNtwsCgvB7Ri' });
+      const scene = document.getElementById('aframeScene');
+      const arButton = document.getElementById('ar-button');
 
-  <a-entity
-    light="
-      type: directional;
-      intensity: 0.8;
-      castShadow: true;
-      shadowMapHeight:2048;
-      shadowMapWidth:2048;
-      shadowCameraTop: 10;
-      target: #model;
-      shadowRadius: 12"
-    xrextras-attach="target: model; offset: 1 15 3;"
-    shadow>
-  </a-entity>
+      // Initialize 8th Wall AR on button click
+      arButton.addEventListener('click', () => {
+        XR8.addCameraPipelineModules([
+          XR8.GlTextureRenderer.pipelineModule(),   // Renders 3D content to AR
+          XR8.XrController.pipelineModule()         // Enables the AR session
+        ]);
 
-  <a-light type="ambient" intensity="0.7"></a-light>
+        XR8.run({
+          canvas: document.querySelector('canvas'),  // Render AR to canvas
+          ownCamera: true,
+        });
 
-  <a-entity 
-    id="model" 
-    gltf-model="#sandCastleModel" 
-    class="cantap" 
-    xrextras-hold-drag 
-    xrextras-two-finger-rotate 
-    xrextras-pinch-scale 
-    scale="3 3 3" 
-    shadow="receive: false">
-  </a-entity>
+        scene.style.display = 'block';  // Show A-Frame scene after AR starts
+        arButton.style.display = 'none'; // Hide the AR button
+      });
 
-  <a-plane
-    id="ground" 
-    rotation="-90 0 0" 
-    width="1000" 
-    height="1000" 
-    material="shader: shadow" 
-    shadow>
-  </a-plane>
-</a-scene>
+      scene.style.display = 'none';  // Initially hide the A-Frame scene
+    </script>
+  </body>
+</html>
