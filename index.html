@@ -52,9 +52,8 @@
     </a-scene>
 
     <button id="ar-button">Start AR</button>
-    <script async src="appKey=bLuH3l4u7QPbKEW9brR1mgJXeDELSpyt0VbEANa567qRsz1QD3VkdGliJ50aDZ0AaLRzJh"></script>
+
     <script>
-     
       const scene = document.getElementById('aframeScene');
       const arButton = document.getElementById('ar-button');
 
@@ -67,6 +66,7 @@
 
         XR8.run({
           canvas: document.querySelector('canvas'),  // Render AR to canvas
+          apiKey: '4FJLYhPesbCFf23KoRf4j49vLt5SXAJs0XirXcsMDKnbvChSbL9FKNhqsJSbQ9benLpsir',               // Replace this with your actual API key
           ownCamera: true,
         });
 
