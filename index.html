@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Model Viewer with AR for Safari</title>
-  <script type="module" src="model-viewer.min.js"></script>
+  <title>AR Viewer Alternative for iOS</title>
+  <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
   <style>
     body {
       margin: 0;
@@ -13,22 +13,19 @@
       align-items: center;
       justify-content: center;
       height: 100vh;
-      background-color: #f8f8f8;
+      background-color: #f0f0f0;
     }
-
     model-viewer {
       width: 100%;
       height: 60vh;
       max-width: 600px;
       border: 1px solid #ccc;
     }
-
     .controls {
       margin-top: 10px;
       display: flex;
       gap: 10px;
     }
-
     button {
       padding: 10px 20px;
       font-size: 16px;
@@ -38,7 +35,6 @@
       color: white;
       border-radius: 5px;
     }
-
     button:hover {
       background-color: #0056b3;
     }
@@ -46,15 +42,16 @@
 </head>
 <body>
 
+<!-- Model Viewer with AR support for different platforms -->
 <model-viewer id="modelViewer"
-              src="https://modelviewer.dev/shared-assets/models/Astronaut.glb" 
-              ios-src="https://modelviewer.dev/shared-assets/models/Astronaut.usdz" 
-              alt="A 3D model of an astronaut" 
-              ar 
-              camera-controls 
-              auto-rotate 
-              ar-modes="quick-look webxr scene-viewer"
-              environment-image="neutral" 
+              src="https://modelviewer.dev/shared-assets/models/Astronaut.glb"
+              ios-src="https://modelviewer.dev/shared-assets/models/Astronaut.usdz"
+              alt="A 3D model of an astronaut"
+              ar
+              camera-controls
+              auto-rotate
+              ar-modes="scene-viewer webxr quick-look"
+              environment-image="neutral"
               shadow-intensity="1">
 </model-viewer>
 
@@ -73,8 +70,9 @@
     modelViewer.autoRotate = !modelViewer.autoRotate;
   });
 
-  // Trigger AR mode for iOS Safari (Quick Look)
+  // Trigger AR mode depending on the platform (Scene Viewer, WebXR, or Quick Look)
   arButton.addEventListener('click', () => {
+    // Check if AR can be activated (WebXR, Scene Viewer, or Quick Look)
     if (modelViewer.canActivateAR) {
       modelViewer.activateAR();
     } else {
