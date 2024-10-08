@@ -47,11 +47,10 @@
     <canvas id="xr-canvas"></canvas>
 
     <!-- Three.js Library -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <!-- GLTFLoader from the Three.js examples -->
-    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/jsm/loaders/GLTFLoader.js"></script>
+    <script type="module">
+        import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.module.js';
+        import { GLTFLoader } from 'https://cdn.jsdelivr.net/npm/three@0.128.0/examples/jsm/loaders/GLTFLoader.js';
 
-    <script>
         let xrSession = null;
         let xrCanvas = document.getElementById('xr-canvas');
         let enterARButton = document.getElementById('enter-ar-button');
@@ -69,7 +68,7 @@
         scene.add(light);
 
         // Load GLTF model
-        const loader = new THREE.GLTFLoader(); // Correctly instantiate the GLTFLoader
+        const loader = new GLTFLoader(); // Correctly instantiate the GLTFLoader
         let model;
 
         loader.load('https://cdn.aframe.io/test-models/models/monkey/monkey.gltf', (gltf) => {
