@@ -18,7 +18,7 @@ const MyARScene = ({ selectedModel }) => {
       )}
       {selectedModel === 'model2' && (
         <Viro3DObject
-          source={require('./model2.gltf')}
+          source={require('./c9c572b946de4f6b9f0fcc7043c23ea0.glb')}
           position={[0, 0, -2]}
           scale={[0.2, 0.2, 0.2]}
           type="GLTF"
