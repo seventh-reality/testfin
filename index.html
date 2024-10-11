@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Onirix Studio Example</title>
+    <!-- Load Onirix SDK -->
     <script src="https://cdn.onirix.com/onirix.js"></script>
     <style>
         body { margin: 0; overflow: hidden; }
@@ -19,89 +20,97 @@
     </div>
 
     <script>
-        // Define your variables
-        let model1, model2, model3, trackingMesh;
+        // Ensure Onirix is loaded
+        window.addEventListener('onload', () => {
+            if (typeof Onirix === 'undefined') {
+                console.error("Onirix SDK failed to load.");
+                return;
+            }
 
-        // Function to initialize the scene
-        function initScene() {
-            // iOS visualization mode adjustment for best tracking
-            Onirix.setIosVisualizationMode(true);
+            // Initialize your variables
+            let model1, model2, model3, trackingMesh;
 
-            // Create a surface tracker
-            const surfaceTracker = new Onirix.SurfaceTracker();
+            // Function to initialize the scene
+            function initScene() {
+                // iOS visualization mode adjustment for best tracking
+                Onirix.setIosVisualizationMode(true);
 
-            // Load models
-            model1 = new Onirix.Model("path/to/model1.glb");
-            model2 = new Onirix.Model("path/to/model2.glb");
-            model3 = new Onirix.Model("path/to/model3.glb");
+                // Create a surface tracker
+                const surfaceTracker = new Onirix.SurfaceTracker();
 
-            // Set initial visibility
-            model1.visible = false; // Disable model1
-            model2.visible = true;  // Enable model2
-            model3.visible = true;  // Enable model3
+                // Load models
+                model1 = new Onirix.Model("path/to/model1.glb");
+                model2 = new Onirix.Model("path/to/model2.glb");
+                model3 = new Onirix.Model("path/to/model3.glb");
 
-            // Add models to the scene
-            Onirix.add(model1);
-            Onirix.add(model2);
-            Onirix.add(model3);
-
-            // Create tracking mesh
-            trackingMesh = new Onirix.Mesh();
-            trackingMesh.visible = false; // Initially disabled
-            Onirix.add(trackingMesh);
-
-            // Add event listeners for touch events
-            Onirix.on("tap", handleTap);
-            Onirix.on("surfaceTracked", onSurfaceTracked);
-
-            // Set up UI button click handlers
-            document.getElementById('button1').onclick = () => playAnimation(model1);
-            document.getElementById('button2').onclick = () => playAnimation(model2);
-            document.getElementById('button3').onclick = () => playAnimation(model3);
-        }
-
-        // Function to play animation without looping
-        function playAnimation(model) {
-            model.playAnimation("animationName"); // Replace "animationName" with the actual animation name
-        }
-
-        // Handle tap events
-        function handleTap(event) {
-            if (model2.visible) {
-                model2.visible = false; // Disable model2
-                model1.visible = true;  // Enable model1
-                trackingMesh.visible = false; // Disable tracking mesh
-            } else if (model1.visible) {
+                // Set initial visibility
                 model1.visible = false; // Disable model1
                 model2.visible = true;  // Enable model2
-                trackingMesh.visible = false; // Disable tracking mesh
+                model3.visible = true;  // Enable model3
+
+                // Add models to the scene
+                Onirix.add(model1);
+                Onirix.add(model2);
+                Onirix.add(model3);
+
+                // Create tracking mesh
+                trackingMesh = new Onirix.Mesh();
+                trackingMesh.visible = false; // Initially disabled
+                Onirix.add(trackingMesh);
+
+                // Add event listeners for touch events
+                Onirix.on("tap", handleTap);
+                Onirix.on("surfaceTracked", onSurfaceTracked);
+
+                // Set up UI button click handlers
+                document.getElementById('button1').onclick = () => playAnimation(model1);
+                document.getElementById('button2').onclick = () => playAnimation(model2);
+                document.getElementById('button3').onclick = () => playAnimation(model3);
             }
-        }
 
-        // Handle surface tracking events
-        function onSurfaceTracked(event) {
-            trackingMesh.visible = true; // Enable tracking mesh when surface is tracked
-        }
+            // Function to play animation without looping
+            function playAnimation(model) {
+                model.playAnimation("animationName"); // Replace "animationName" with the actual animation name
+            }
 
-        // Handle scaling and rotation with gestures
-        Onirix.on("pinch", (event) => {
-            const scaleFactor = event.scale; // Get pinch scale factor
-            model1.scale.x *= scaleFactor; 
-            model1.scale.y *= scaleFactor; 
-            model1.scale.z *= scaleFactor;
-            model2.scale.x *= scaleFactor; 
-            model2.scale.y *= scaleFactor; 
-            model2.scale.z *= scaleFactor;
+            // Handle tap events
+            function handleTap(event) {
+                if (model2.visible) {
+                    model2.visible = false; // Disable model2
+                    model1.visible = true;  // Enable model1
+                    trackingMesh.visible = false; // Disable tracking mesh
+                } else if (model1.visible) {
+                    model1.visible = false; // Disable model1
+                    model2.visible = true;  // Enable model2
+                    trackingMesh.visible = false; // Disable tracking mesh
+                }
+            }
+
+            // Handle surface tracking events
+            function onSurfaceTracked(event) {
+                trackingMesh.visible = true; // Enable tracking mesh when surface is tracked
+            }
+
+            // Handle scaling and rotation with gestures
+            Onirix.on("pinch", (event) => {
+                const scaleFactor = event.scale; // Get pinch scale factor
+                model1.scale.x *= scaleFactor; 
+                model1.scale.y *= scaleFactor; 
+                model1.scale.z *= scaleFactor;
+                model2.scale.x *= scaleFactor; 
+                model2.scale.y *= scaleFactor; 
+                model2.scale.z *= scaleFactor;
+            });
+
+            Onirix.on("pan", (event) => {
+                const rotationDelta = event.delta; // Get rotation delta
+                model1.rotation.y += rotationDelta.x * 0.01; // Rotate model1
+                model2.rotation.y += rotationDelta.x * 0.01; // Rotate model2
+            });
+
+            // Initialize the scene
+            initScene();
         });
-
-        Onirix.on("pan", (event) => {
-            const rotationDelta = event.delta; // Get rotation delta
-            model1.rotation.y += rotationDelta.x * 0.01; // Rotate model1
-            model2.rotation.y += rotationDelta.x * 0.01; // Rotate model2
-        });
-
-        // Initialize the scene
-        initScene();
     </script>
 </body>
 </html>
