@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Three.js with AR.js - Surface Tracking</title>
-    
+
     <!-- A-Frame and AR.js -->
     <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
     <script src="https://cdn.jsdelivr.net/gh/AR-js-org/AR.js/aframe/build/aframe-ar.js"></script>
@@ -20,10 +20,10 @@
 <!-- AR.js Scene with Surface Tracking -->
 <a-scene embedded arjs="sourceType: webcam; trackingMethod: best;">
     <!-- Hit-test target for surface detection -->
-    <a-anchor hit-testing-enabled="true">
+    <a-anchor hit-testing-enabled="true" id="hit-test-anchor">
         <a-entity id="model-container"></a-entity>
     </a-anchor>
-    <a-camera gps-camera rotation-reader></a-camera>
+    <a-camera gps-camera rotation-reader fov="60"></a-camera> <!-- Fixed FOV -->
 </a-scene>
 
 <!-- UI Buttons to Switch Models -->
@@ -38,6 +38,7 @@
 
     let currentModel = null;
     const modelContainer = document.getElementById('model-container');
+    const hitTestAnchor = document.getElementById('hit-test-anchor');
     
     // GLTFLoader to load 3D models
     const loader = new GLTFLoader();
@@ -68,6 +69,16 @@
 
     document.getElementById('button3').addEventListener('click', () => {
         loadModel('90d4862ea1a84b45b63b8a860da94956.glb'); // Replace with actual path to Model 3
+    });
+
+    // Function to place the model at the detected hit-test surface
+    hitTestAnchor.addEventListener('hit-test-select', (e) => {
+        const position = e.detail.intersection.point;
+        const rotation = e.detail.intersection.face.normal;
+
+        // Place the model at the hit-test location
+        hitTestAnchor.setAttribute('position', position);
+        hitTestAnchor.setAttribute('rotation', rotation);
     });
 </script>
 
