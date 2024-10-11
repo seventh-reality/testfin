@@ -4,9 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Onirix Studio Example</title>
-    <!-- Load Onirix SDK (non-module version) -->
-   <script type="module" src="https://unpkg.com/@onirix/ar-engine-sdk@latest/dist/ox-sdk.js"></script>
-    <!-- Load Three.js and GLTFLoader from the official CDN -->
+    <script type="module" src="https://unpkg.com/@onirix/ar-engine-sdk@latest/dist/ox-sdk.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r136/three.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r136/examples/js/loaders/GLTFLoader.js"></script>
     <style>
@@ -23,32 +21,23 @@
     </div>
 
     <script>
-        // Ensure the window loads correctly before initializing
         window.addEventListener('load', () => {
             if (typeof Onirix === 'undefined') {
                 console.error("Onirix SDK failed to load.");
                 return;
             }
 
-            // Add your Onirix SDK key here
             const sdkKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjUyMDIsInByb2plY3RJZCI6MTQ0MjgsInJvbGUiOjMsImlhdCI6MTYxNjc1ODY5NX0.8F5eAPcBGaHzSSLuQAEgpdja9aEZ6Ca_Ll9wg84Rp5k"; // Replace with your actual SDK key
 
-            // Initialize Onirix with the SDK key
             Onirix.init({ apiKey: sdkKey }).then(() => {
                 console.log("Onirix initialized successfully");
 
-                // Initialize your variables
                 let model1, model2, model3, trackingMesh;
 
-                // Function to initialize the scene
                 function initScene() {
-                    // iOS visualization mode adjustment for best tracking
                     Onirix.setIosVisualizationMode(true);
-
-                    // Create a surface tracker
                     const surfaceTracker = new Onirix.SurfaceTracker();
 
-                    // Load models (use valid paths to your models)
                     const loader = new THREE.GLTFLoader();
                     loader.load('path/to/model1.glb', (gltf) => {
                         model1 = gltf.scene;
@@ -66,72 +55,54 @@
                         Onirix.add(model3);
                     });
 
-                    // Create tracking mesh
                     trackingMesh = new Onirix.Mesh();
-                    trackingMesh.visible = false; // Initially disabled
+                    trackingMesh.visible = false; 
                     Onirix.add(trackingMesh);
 
-                    // Add event listeners for touch events
                     Onirix.on("tap", handleTap);
                     Onirix.on("surfaceTracked", onSurfaceTracked);
 
-                    // Set up UI button click handlers
                     document.getElementById('button1').onclick = () => playAnimation(model1);
                     document.getElementById('button2').onclick = () => playAnimation(model2);
                     document.getElementById('button3').onclick = () => playAnimation(model3);
                 }
 
-                // Function to play animation without looping
                 function playAnimation(model) {
                     if (model && model.animations.length > 0) {
                         const mixer = new THREE.AnimationMixer(model);
-                        const action = mixer.clipAction(model.animations[0]); // Replace with actual animation name if needed
+                        const action = mixer.clipAction(model.animations[0]);
                         action.play();
                     }
                 }
 
-                // Handle tap events
                 function handleTap(event) {
                     if (model2.visible) {
-                        model2.visible = false; // Disable model2
-                        model1.visible = true;  // Enable model1
-                        trackingMesh.visible = false; // Disable tracking mesh
+                        model2.visible = false; 
+                        model1.visible = true;  
                     } else if (model1.visible) {
-                        model1.visible = false; // Disable model1
-                        model2.visible = true;  // Enable model2
-                        trackingMesh.visible = false; // Disable tracking mesh
+                        model1.visible = false; 
+                        model2.visible = true;  
                     }
+                    trackingMesh.visible = false; // Disable tracking mesh
                 }
 
-                // Handle surface tracking events
                 function onSurfaceTracked(event) {
-                    trackingMesh.visible = true; // Enable tracking mesh when surface is tracked
+                    trackingMesh.visible = true; 
                 }
 
-                // Handle scaling and rotation with gestures
                 Onirix.on("pinch", (event) => {
-                    const scaleFactor = event.scale; // Get pinch scale factor
-                    if (model1) {
-                        model1.scale.setScalar(model1.scale.x * scaleFactor);
-                    }
-                    if (model2) {
-                        model2.scale.setScalar(model2.scale.x * scaleFactor);
-                    }
+                    const scaleFactor = event.scale; 
+                    if (model1) model1.scale.setScalar(model1.scale.x * scaleFactor);
+                    if (model2) model2.scale.setScalar(model2.scale.x * scaleFactor);
                 });
 
                 Onirix.on("pan", (event) => {
-                    const rotationDelta = event.delta; // Get rotation delta
-                    if (model1) {
-                        model1.rotation.y += rotationDelta.x * 0.01; // Rotate model1
-                    }
-                    if (model2) {
-                        model2.rotation.y += rotationDelta.x * 0.01; // Rotate model2
-                    }
+                    const rotationDelta = event.delta; 
+                    if (model1) model1.rotation.y += rotationDelta.x * 0.01; 
+                    if (model2) model2.rotation.y += rotationDelta.x * 0.01; 
                 });
 
-                // Initialize the scene
                 initScene();
-
             }).catch(err => {
                 console.error("Failed to initialize Onirix:", err);
             });
