@@ -4,7 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Onirix Studio Example</title>
-    <script src="https://your-cdn-or-server/onirix-sdk.js" onload="initializeOnirix()"></script>
+    <!-- Correct Onirix SDK URL (update if needed) -->
+    <script src="https://unpkg.com/@onirix/ar-engine-sdk@1.6.5/dist/ox-sdk.js"></script>
+    <!-- Load Three.js and GLTFLoader from the official CDN -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r136/three.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r136/examples/js/loaders/GLTFLoader.js"></script>
     <style>
@@ -21,6 +23,7 @@
     </div>
 
     <script>
+        // Wait until everything is loaded
         window.addEventListener('load', () => {
             if (typeof Onirix === 'undefined') {
                 console.error("Onirix SDK failed to load.");
@@ -29,6 +32,7 @@
 
             const sdkKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjUyMDIsInByb2plY3RJZCI6MTQ0MjgsInJvbGUiOjMsImlhdCI6MTYxNjc1ODY5NX0.8F5eAPcBGaHzSSLuQAEgpdja9aEZ6Ca_Ll9wg84Rp5k"; // Replace with your actual SDK key
 
+            // Initialize Onirix with the SDK key
             Onirix.init({ apiKey: sdkKey }).then(() => {
                 console.log("Onirix initialized successfully");
 
