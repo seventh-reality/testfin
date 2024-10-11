@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Onirix Studio Example</title>
-    <!-- Load Onirix SDK -->
-    <script src="https://unpkg.com/@onirix/ar-engine-sdk@1.6.5/dist/ox-sdk.esm.js"></script>
+    <!-- Load Onirix SDK (as a module) -->
+    <script type="module" src="https://unpkg.com/@onirix/ar-engine-sdk@1.6.5/dist/ox-sdk.esm.js"></script>
     <!-- Load Three.js and GLTFLoader from the official CDN -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r136/three.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r136/examples/js/loaders/GLTFLoader.js"></script>
@@ -22,7 +22,7 @@
         <button id="button3">Play Model 3 Animation</button>
     </div>
 
-    <script>
+    <script type="module">
         // Ensure the window loads correctly before initializing
         window.addEventListener('load', () => {
             if (typeof Onirix === 'undefined') {
