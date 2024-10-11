@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Onirix Surface Tracking with GLB Model</title>
-    <script src="https://cdn.onirix.com/js/ox-sdk.js"></script>
+    <script src="https://cdn.onirix.com/js/ox-sdk.js" onload="initializeOnirix()"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r136/three.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r136/examples/js/loaders/GLTFLoader.js"></script>
 </head>
@@ -13,32 +13,34 @@
         const sdkKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjUyMDIsInByb2plY3RJZCI6MTQ0MjgsInJvbGUiOjMsImlhdCI6MTYxNjc1ODY5NX0.8F5eAPcBGaHzSSLuQAEgpdja9aEZ6Ca_Ll9wg84Rp5k'; // Replace with your actual SDK key
         let model; // To store the 3D model
 
-        // Initialize the Onirix SDK
-        Onirix.init({ apiKey: sdkKey }).then(() => {
-            console.log("Onirix initialized successfully");
+        function initializeOnirix() {
+            // Initialize the Onirix SDK
+            Onirix.init({ apiKey: sdkKey }).then(() => {
+                console.log("Onirix initialized successfully");
 
-            // Setup surface tracking
-            const surfaceTracker = new Onirix.SurfaceTracker();
+                // Setup surface tracking
+                const surfaceTracker = new Onirix.SurfaceTracker();
 
-            // Load the GLB model
-            const loader = new THREE.GLTFLoader();
-            loader.load('90d4862ea1a84b45b63b8a860da94956.glb', (gltf) => {
-                model = gltf.scene;
-                model.visible = false;  // Initially hide the model
-                Onirix.add(model);      // Add the model to the Onirix scene
+                // Load the GLB model
+                const loader = new THREE.GLTFLoader();
+                loader.load('path/to/your-model.glb', (gltf) => {
+                    model = gltf.scene;
+                    model.visible = false;  // Initially hide the model
+                    Onirix.add(model);      // Add the model to the Onirix scene
+                });
+
+                // Add event listener for surface tracking
+                Onirix.on('surfaceTracked', (event) => {
+                    if (model) {
+                        model.visible = true;  // Make the model visible
+                        model.position.set(event.position.x, event.position.y, event.position.z);  // Set the position of the model
+                    }
+                    console.log('Surface tracked at position:', event.position);
+                });
+            }).catch(err => {
+                console.error('Failed to initialize Onirix SDK:', err);
             });
-
-            // Add event listener for surface tracking
-            Onirix.on('surfaceTracked', (event) => {
-                if (model) {
-                    model.visible = true;  // Make the model visible
-                    model.position.set(event.position.x, event.position.y, event.position.z);  // Set the position of the model
-                }
-                console.log('Surface tracked at position:', event.position);
-            });
-        }).catch(err => {
-            console.error('Failed to initialize Onirix SDK:', err);
-        });
+        }
     </script>
 </body>
 </html>
