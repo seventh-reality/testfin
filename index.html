@@ -4,7 +4,19 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Onirix Studio Example</title>
-    <script src="https://example.com/onirix-sdk.js" onload="myOnirixFunction()"></script>
+    <script src="https://your-cdn-or-server/onirix-sdk.js" onload="initializeOnirix()"></script>
+
+<script>
+function initializeOnirix() {
+    if (typeof Onirix === 'undefined') {
+        console.error("Onirix SDK failed to load.");
+        return;
+    }
+
+    const sdkKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjUyMDIsInByb2plY3RJZCI6MTQ0MjgsInJvbGUiOjMsImlhdCI6MTYxNjc1ODY5NX0.8F5eAPcBGaHzSSLuQAEgpdja9aEZ6Ca_Ll9wg84Rp5k"; 
+    // Your Onirix SDK initialization code here
+}
+</script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r136/three.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r136/examples/js/loaders/GLTFLoader.js"></script>
     <style>
