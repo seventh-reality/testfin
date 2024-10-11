@@ -3,115 +3,41 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Onirix Studio Example</title>
-    <!-- Correct Onirix SDK URL (update if needed) -->
-    <script src="https://example.com/onirix-sdk.js"></script> 
-    <script src="https://unpkg.com/@onirix/ar-engine-sdk@1.6.5/dist/ox-sdk.js"></script>
-    <!-- Load Three.js and GLTFLoader from the official CDN -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r136/three.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r136/examples/js/loaders/GLTFLoader.js"></script>
+    <title>AR Surface Tracking with Onirix</title>
+    <script src="https://cdn.onirix.com/onirix.js"></script>
     <style>
-        body { margin: 0; overflow: hidden; }
-        #ui { position: absolute; top: 20px; left: 20px; z-index: 10; }
-        button { margin: 5px; padding: 10px; }
+        body { margin: 0; }
+        #ar-container { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
+        canvas { width: 100%; height: 100%; }
     </style>
 </head>
 <body>
-    <div id="ui">
-        <button id="button1">Play Model 1 Animation</button>
-        <button id="button2">Play Model 2 Animation</button>
-        <button id="button3">Play Model 3 Animation</button>
-    </div>
-
+    <div id="ar-container"></div>
     <script>
-        // Wait until everything is loaded
-        window.addEventListener('load', () => {
-            if (typeof Onirix === 'undefined') {
-                console.error("Onirix SDK failed to load.");
-                return;
+        const arContainer = document.getElementById('ar-container');
+        const session = new Onirix.Session({
+            container: arContainer,
+            onSurfaceDetected: (surface) => {
+                console.log('Surface detected:', surface);
+                loadModelOnSurface(surface);
             }
-
-            const sdkKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjUyMDIsInByb2plY3RJZCI6MTQ0MjgsInJvbGUiOjMsImlhdCI6MTYxNjc1ODY5NX0.8F5eAPcBGaHzSSLuQAEgpdja9aEZ6Ca_Ll9wg84Rp5k"; // Replace with your actual SDK key
-
-            // Initialize Onirix with the SDK key
-            Onirix.init({ apiKey: sdkKey }).then(() => {
-                console.log("Onirix initialized successfully");
-
-                let model1, model2, model3, trackingMesh;
-
-                function initScene() {
-                    Onirix.setIosVisualizationMode(true);
-                    const surfaceTracker = new Onirix.SurfaceTracker();
-
-                    const loader = new THREE.GLTFLoader();
-                    loader.load('path/to/model1.glb', (gltf) => {
-                        model1 = gltf.scene;
-                        model1.visible = false;
-                        Onirix.add(model1);
-                    });
-                    loader.load('path/to/model2.glb', (gltf) => {
-                        model2 = gltf.scene;
-                        model2.visible = true;
-                        Onirix.add(model2);
-                    });
-                    loader.load('path/to/model3.glb', (gltf) => {
-                        model3 = gltf.scene;
-                        model3.visible = true;
-                        Onirix.add(model3);
-                    });
-
-                    trackingMesh = new Onirix.Mesh();
-                    trackingMesh.visible = false; 
-                    Onirix.add(trackingMesh);
-
-                    Onirix.on("tap", handleTap);
-                    Onirix.on("surfaceTracked", onSurfaceTracked);
-
-                    document.getElementById('button1').onclick = () => playAnimation(model1);
-                    document.getElementById('button2').onclick = () => playAnimation(model2);
-                    document.getElementById('button3').onclick = () => playAnimation(model3);
-                }
-
-                function playAnimation(model) {
-                    if (model && model.animations.length > 0) {
-                        const mixer = new THREE.AnimationMixer(model);
-                        const action = mixer.clipAction(model.animations[0]);
-                        action.play();
-                    }
-                }
-
-                function handleTap(event) {
-                    if (model2.visible) {
-                        model2.visible = false; 
-                        model1.visible = true;  
-                    } else if (model1.visible) {
-                        model1.visible = false; 
-                        model2.visible = true;  
-                    }
-                    trackingMesh.visible = false; // Disable tracking mesh
-                }
-
-                function onSurfaceTracked(event) {
-                    trackingMesh.visible = true; 
-                }
-
-                Onirix.on("pinch", (event) => {
-                    const scaleFactor = event.scale; 
-                    if (model1) model1.scale.setScalar(model1.scale.x * scaleFactor);
-                    if (model2) model2.scale.setScalar(model2.scale.x * scaleFactor);
-                });
-
-                Onirix.on("pan", (event) => {
-                    const rotationDelta = event.delta; 
-                    if (model1) model1.rotation.y += rotationDelta.x * 0.01; 
-                    if (model2) model2.rotation.y += rotationDelta.x * 0.01; 
-                });
-
-                initScene();
-            }).catch(err => {
-                console.error("Failed to initialize Onirix:", err);
-            });
         });
+
+        async function loadModelOnSurface(surface) {
+            const modelUrl = 'https://yourmodelurl.com/model.glb'; // Replace with your model URL
+            try {
+                const model = await Onirix.Model.load(modelUrl);
+                session.addModel(model, {
+                    position: surface.position,
+                    rotation: surface.rotation
+                });
+                console.log('Model loaded:', model);
+            } catch (error) {
+                console.error('Error loading model:', error);
+            }
+        }
+
+        session.start();
     </script>
 </body>
 </html>
