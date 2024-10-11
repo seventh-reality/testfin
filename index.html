@@ -1,71 +1,73 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-    <title>&lt;model-viewer&gt; template</title>
-    <meta charset="utf-8">
-    <meta name="description" content="&lt;model-viewer&gt; template">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link type="text/css" href="./styles.css" rel="stylesheet"/>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Three.js with AR.js - Surface Tracking</title>
+    <!-- AR.js for surface tracking -->
+    <script src="https://cdn.jsdelivr.net/gh/AR-js-org/AR.js/three.js/build/ar.js"></script>
+    <!-- Three.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r136/three.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r136/examples/js/loaders/GLTFLoader.js"></script>
     <style>
-        /* Basic styles for iOS buttons */
-        .ios-button {
-            background-color: #007AFF;
-            color: white;
-            border: none;
-            border-radius: 10px;
-            padding: 10px 15px;
-            font-size: 16px;
-            margin: 10px;
-            cursor: pointer;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
-            transition: background-color 0.3s;
-        }
-
-        .ios-button:hover {
-            background-color: #0051FF;
-        }
-
-        .button-container {
-            position: absolute;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            display: flex;
-            flex-direction: row;
-        }
+        body { margin: 0; overflow: hidden; }
+        #ui { position: absolute; top: 20px; left: 20px; z-index: 10; }
+        button { margin: 5px; padding: 10px; }
     </style>
 </head>
 <body>
-    <!-- <model-viewer> HTML element -->
-    <model-viewer id="model-viewer" src="90d4862ea1a84b45b63b8a860da94956.glb" ar ar-modes="webxr scene-viewer quick-look" camera-controls tone-mapping="neutral" poster="poster.webp" shadow-intensity="1" autoplay>
-        <div class="progress-bar hide" slot="progress-bar">
-            <div class="update-bar"></div>
-        </div>
-        <button slot="ar-button" id="ar-button">
-            View in your space
-        </button>
-        <div id="ar-prompt">
-            <img src="ar_hand_prompt.png">
-        </div>
-        <div class="button-container">
-        <button class="ios-button" onclick="switchModel('c9c572b946de4f6b9f0fcc7043c23ea0.glb')">Model 1</button>
-        <button class="ios-button" onclick="switchModel('90d4862ea1a84b45b63b8a860da94956.glb')">Model 2</button>
-        <button class="ios-button" onclick="switchModel('c9c572b946de4f6b9f0fcc7043c23ea0.glb')">Model 3</button>
-       </div>
-    </model-viewer>
 
-    <!-- Button Container -->
-    
+<!-- AR.js Scene with Surface Tracking -->
+<a-scene embedded arjs="sourceType: webcam; trackingMethod: best;">
+    <!-- Hit-test target for surface detection -->
+    <a-anchor hit-testing-enabled="true">
+        <a-entity id="model-container"></a-entity>
+    </a-anchor>
+    <a-camera gps-camera rotation-reader></a-camera>
+</a-scene>
 
-    <script src="script.js"></script>
-    <!-- Loads <model-viewer> for browsers: -->
-    <script type="module" src="model-viewer.min.js"></script>
+<!-- UI Buttons to Switch Models -->
+<div id="ui">
+    <button id="button1">Load Model 1</button>
+    <button id="button2">Load Model 2</button>
+    <button id="button3">Load Model 3</button>
+</div>
 
-    <script>
-        function switchModel(modelSrc) {
-            const modelViewer = document.getElementById('model-viewer');
-            modelViewer.src = modelSrc;
+<script>
+    let currentModel = null;
+    let modelContainer = document.getElementById('model-container');
+
+    // GLTFLoader to load 3D models
+    const loader = new THREE.GLTFLoader();
+
+    // Function to load a GLB model and display it in the AR scene
+    function loadModel(path) {
+        // Remove the current model if it exists
+        if (currentModel) {
+            modelContainer.object3D.remove(currentModel);
         }
-    </script>
+
+        // Load the new model
+        loader.load(path, (gltf) => {
+            currentModel = gltf.scene;
+            currentModel.scale.set(0.5, 0.5, 0.5);  // Scale the model
+            modelContainer.object3D.add(currentModel);
+        });
+    }
+
+    // Set event listeners for buttons
+    document.getElementById('button1').addEventListener('click', () => {
+        loadModel('path/to/your-model1.glb'); // Replace with the actual path to Model 1
+    });
+
+    document.getElementById('button2').addEventListener('click', () => {
+        loadModel('path/to/your-model2.glb'); // Replace with the actual path to Model 2
+    });
+
+    document.getElementById('button3').addEventListener('click', () => {
+        loadModel('path/to/your-model3.glb'); // Replace with the actual path to Model 3
+    });
+</script>
+
 </body>
 </html>
