@@ -6,10 +6,27 @@
     <meta name="description" content="&lt;model-viewer&gt; template">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link type="text/css" href="./styles.css" rel="stylesheet"/>
+    <style>
+      /* Simple styles for buttons */
+      button {
+        margin: 5px;
+        padding: 10px 15px;
+        font-size: 16px;
+        cursor: pointer;
+      }
+    </style>
   </head>
   <body>
     <!-- <model-viewer> HTML element -->
-    <model-viewer id="model-viewer" src="90d4862ea1a84b45b63b8a860da94956.glb" ar ar-modes="webxr scene-viewer quick-look" camera-controls tone-mapping="neutral" poster="poster.webp" shadow-intensity="1" autoplay>
+    <model-viewer id="model-viewer" 
+                  src="90d4862ea1a84b45b63b8a860da94956.glb" 
+                  ar 
+                  ar-modes="webxr scene-viewer quick-look" 
+                  camera-controls 
+                  tone-mapping="neutral" 
+                  poster="poster.webp" 
+                  shadow-intensity="1" 
+                  autoplay>
       <div class="progress-bar hide" slot="progress-bar">
           <div class="update-bar"></div>
       </div>
@@ -17,19 +34,35 @@
           View in your space
       </button>
       <div id="ar-prompt">
-          <img src="ar_hand_prompt.png">
+          <img src="ar_hand_prompt.png" alt="AR Hand Prompt">
       </div>
       <div>
-      <button onclick="switchModel('c9c572b946de4f6b9f0fcc7043c23ea0.glb')">Model 1</button>
-      <button onclick="switchModel('90d4862ea1a84b45b63b8a860da94956.glb')">Model 2</button>
-      <button onclick="switchModel('c9c572b946de4f6b9f0fcc7043c23ea0.glb')">Model 3</button>
-    </div>
+        <button data-model="c9c572b946de4f6b9f0fcc7043c23ea0.glb">Model 1</button>
+        <button data-model="90d4862ea1a84b45b63b8a860da94956.glb">Model 2</button>
+        <button data-model="c9c572b946de4f6b9f0fcc7043c23ea0.glb">Model 3</button>
+      </div>
     </model-viewer>  
-    <script src="script.js"></script>
-    <!-- Loads <model-viewer> for browsers: -->
     <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.5.0/model-viewer.min.js"></script>
-
+    
     <script>
+      document.addEventListener('DOMContentLoaded', () => {
+        const modelViewer = document.getElementById('model-viewer');
+        
+        document.querySelectorAll('button[data-model]').forEach(button => {
+          button.addEventListener('click', (event) => {
+            switchModel(event.target.getAttribute('data-model'));
+          });
+          button.addEventListener('touchend', (event) => {
+            event.preventDefault(); // Prevent default touch behavior
+            switchModel(event.target.getAttribute('data-model'));
+          });
+        });
+        
+        document.getElementById('ar-button').addEventListener('click', () => {
+          modelViewer.enterAR();
+        });
+      });
+
       function switchModel(modelSrc) {
         const modelViewer = document.getElementById('model-viewer');
         modelViewer.src = modelSrc;
