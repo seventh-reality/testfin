@@ -3,157 +3,102 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WebAR with WebXR - Surface Tracking</title>
+    <title>Onirix Studio Example</title>
+    <script src="https://cdn.onirix.com/onirix.js"></script>
     <style>
-        body, html {
-            margin: 0;
-            padding: 0;
-            height: 100%;
-            overflow: hidden;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            background-color: #000;
-        }
-
-        #enter-ar-button {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            padding: 10px 20px;
-            background-color: #007bff;
-            color: white;
-            font-size: 16px;
-            cursor: pointer;
-            border: none;
-            border-radius: 5px;
-            z-index: 1000;
-        }
-
-        #enter-ar-button:hover {
-            background-color: #0056b3;
-        }
-
-        canvas {
-            display: block;
-            width: 100%;
-            height: 100%;
-        }
+        body { margin: 0; overflow: hidden; }
+        #ui { position: absolute; top: 20px; left: 20px; }
+        button { margin: 5px; }
     </style>
 </head>
 <body>
-    <button id="enter-ar-button">Start AR</button>
-    <canvas id="xr-canvas"></canvas>
+    <div id="ui">
+        <button id="button1">Play Model 1 Animation</button>
+        <button id="button2">Play Model 2 Animation</button>
+        <button id="button3">Play Model 3 Animation</button>
+    </div>
 
-    <!-- Three.js Library -->
-    <script type="module">
-        import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.module.js';
-        import { GLTFLoader } from 'https://cdn.jsdelivr.net/npm/three@0.128.0/examples/jsm/loaders/GLTFLoader.js';
+    <script>
+        // Define your variables
+        let model1, model2, model3, trackingMesh;
 
-        let xrSession = null;
-        let xrCanvas = document.getElementById('xr-canvas');
-        let enterARButton = document.getElementById('enter-ar-button');
-        let xrHitTestSource = null;
-        let xrViewerSpace = null;
+        // Function to initialize the scene
+        function initScene() {
+            // Create a surface tracker
+            const surfaceTracker = new Onirix.SurfaceTracker();
 
-        // Create Three.js scene and camera
-        const scene = new THREE.Scene();
-        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-        const renderer = new THREE.WebGLRenderer({ canvas: xrCanvas, alpha: true });
-        renderer.xr.enabled = true;
+            // Load models
+            model1 = new Onirix.Model("path/to/model1.glb");
+            model2 = new Onirix.Model("path/to/model2.glb");
+            model3 = new Onirix.Model("path/to/model3.glb");
 
-        // Create light for the scene
-        const light = new THREE.AmbientLight(0xffffff, 1);
-        scene.add(light);
+            // Set initial visibility
+            model1.visible = false; // Disable model1
+            model2.visible = true;  // Enable model2
+            model3.visible = true;  // Enable model3
 
-        // Load GLTF model
-        const loader = new GLTFLoader(); // Correctly instantiate the GLTFLoader
-        let model;
+            // Add models to the scene
+            Onirix.add(model1);
+            Onirix.add(model2);
+            Onirix.add(model3);
 
-        loader.load('https://cdn.aframe.io/test-models/models/monkey/monkey.gltf', (gltf) => {
-            model = gltf.scene;
-            model.scale.set(0.5, 0.5, 0.5); // Scale down the model
-            scene.add(model);
-        }, undefined, (error) => {
-            console.error('Error loading model:', error);
+            // Create tracking mesh
+            trackingMesh = new Onirix.Mesh();
+            trackingMesh.visible = false; // Initially disabled
+            Onirix.add(trackingMesh);
+
+            // Add event listeners for touch events
+            Onirix.on("tap", handleTap);
+            Onirix.on("surfaceTracked", onSurfaceTracked);
+
+            // Set up UI button click handlers
+            document.getElementById('button1').onclick = () => playAnimation(model1);
+            document.getElementById('button2').onclick = () => playAnimation(model2);
+            document.getElementById('button3').onclick = () => playAnimation(model3);
+        }
+
+        // Function to play animation without looping
+        function playAnimation(model) {
+            model.playAnimation("animationName"); // Replace "animationName" with the actual animation name
+        }
+
+        // Handle tap events
+        function handleTap(event) {
+            if (model2.visible) {
+                model2.visible = false; // Disable model2
+                model1.visible = true;  // Enable model1
+                trackingMesh.visible = false; // Disable tracking mesh
+            } else if (model1.visible) {
+                model1.visible = false; // Disable model1
+                model2.visible = true;  // Enable model2
+                trackingMesh.visible = false; // Disable tracking mesh
+            }
+        }
+
+        // Handle surface tracking events
+        function onSurfaceTracked(event) {
+            trackingMesh.visible = true; // Enable tracking mesh when surface is tracked
+        }
+
+        // Handle scaling and rotation with gestures
+        Onirix.on("pinch", (event) => {
+            const scaleFactor = event.scale; // Get pinch scale factor
+            model1.scale.x *= scaleFactor; 
+            model1.scale.y *= scaleFactor; 
+            model1.scale.z *= scaleFactor;
+            model2.scale.x *= scaleFactor; 
+            model2.scale.y *= scaleFactor; 
+            model2.scale.z *= scaleFactor;
         });
 
-        // Start WebXR session
-        async function startXR() {
-            if (navigator.xr) {
-                try {
-                    xrSession = await navigator.xr.requestSession('immersive-ar', {
-                        requiredFeatures: ['hit-test', 'local-floor']
-                    });
-
-                    const gl = renderer.getContext();
-                    await gl.makeXRCompatible();
-
-                    xrViewerSpace = await xrSession.requestReferenceSpace('viewer');
-                    await xrSession.requestReferenceSpace('local-floor');
-
-                    // Create hit test source
-                    xrHitTestSource = await xrSession.requestHitTestSource({ space: xrViewerSpace });
-
-                    xrSession.addEventListener('end', onSessionEnded);
-                    xrSession.requestAnimationFrame(onXRFrame);
-
-                    enterARButton.style.display = 'none'; // Hide the button when AR starts
-                } catch (error) {
-                    console.error('Failed to start WebXR session:', error);
-                }
-            } else {
-                alert('WebXR not supported on this device.');
-            }
-        }
-
-        // Handle AR frame rendering and hit testing
-        function onXRFrame(time, frame) {
-            const session = frame.session;
-            session.requestAnimationFrame(onXRFrame);
-            const viewerPose = frame.getViewerPose(xrViewerSpace);
-
-            if (viewerPose) {
-                const hitTestResults = frame.getHitTestResults(xrHitTestSource);
-                
-                if (hitTestResults.length > 0) {
-                    const hit = hitTestResults[0];
-                    const hitPose = hit.getPose(session.requestReferenceSpace('local-floor'));
-
-                    // Update model position based on hit test
-                    if (model) {
-                        model.position.set(
-                            hitPose.transform.position.x,
-                            hitPose.transform.position.y,
-                            hitPose.transform.position.z
-                        );
-                        model.rotation.setFromRotationMatrix(new THREE.Matrix4().fromArray(hitPose.transform.rotation));
-                    }
-                }
-            }
-
-            // Render the scene
-            renderer.render(scene, camera);
-        }
-
-        // End session handler
-        function onSessionEnded() {
-            xrSession = null;
-            enterARButton.style.display = 'block'; // Show button again after session ends
-        }
-
-        // Start AR session when the button is clicked
-        enterARButton.addEventListener('click', () => {
-            startXR();
+        Onirix.on("pan", (event) => {
+            const rotationDelta = event.delta; // Get rotation delta
+            model1.rotation.y += rotationDelta.x * 0.01; // Rotate model1
+            model2.rotation.y += rotationDelta.x * 0.01; // Rotate model2
         });
 
-        // End the session on page unload
-        window.onbeforeunload = () => {
-            if (xrSession) {
-                xrSession.end();
-            }
-        };
+        // Initialize the scene
+        initScene();
     </script>
 </body>
 </html>
