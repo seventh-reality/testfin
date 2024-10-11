@@ -34,37 +34,33 @@
     auto-rotate 
     camera-controls 
     ar 
-    ar-modes="webxr" 
-    style="display: none;"
-    <div>
+    ar-modes="webxr">
+</model-viewer>
+
+<div>
     <button onclick="switchModel('90d4862ea1a84b45b63b8a860da94956.glb')">Model 1</button>
     <button onclick="switchModel('90d4862ea1a84b45b63b8a860da94956.glb')">Model 2</button>
     <button onclick="switchModel('90d4862ea1a84b45b63b8a860da94956.glb')">Model 3</button>
     <button onclick="toggleAR()">Toggle AR</button>
 </div>
-</model-viewer>
-
 
 <script>
     const modelViewer = document.getElementById('modelViewer');
 
     function switchModel(model) {
         modelViewer.src = model;
-        modelViewer.style.display = 'block'; // Show the model viewer when switching models
     }
 
     function toggleAR() {
-        if (modelViewer.getAttribute('ar')) {
+        if (modelViewer.hasAttribute('ar')) {
             modelViewer.removeAttribute('ar');
-            modelViewer.style.display = 'none'; // Hide if AR is toggled off
         } else {
             modelViewer.setAttribute('ar', '');
-            modelViewer.style.display = 'block'; // Show again if AR is toggled on
         }
     }
 
     // Show the initial model viewer
-    switchModel('model1.glb');
+    switchModel('90d4862ea1a84b45b63b8a860da94956.glb');
 </script>
 
 </body>
