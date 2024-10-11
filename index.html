@@ -1,91 +1,44 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-    <title>&lt;model-viewer&gt; Template</title>
-    <meta charset="utf-8">
-    <meta name="description" content="&lt;model-viewer&gt; Template">
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <style>
-        /* Simple styles for buttons */
-        body {
-            position: relative;
-            margin: 0;
-            overflow: hidden;
-        }
-        button {
-            margin: 5px;
-            padding: 10px 15px;
-            font-size: 16px;
-            cursor: pointer;
-            background-color: rgba(255, 255, 255, 0.8);
-            border: 1px solid #000;
-            border-radius: 5px;
-            position: relative; /* Ensure buttons are positioned correctly */
-            z-index: 10; /* Bring buttons above other elements */
-        }
-        #button-container {
-            position: absolute;
-            top: 20px;
-            left: 20px;
-            z-index: 10; /* Ensure buttons are above the model viewer */
-        }
-    </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Onirix Surface Tracking with GLB Model</title>
+    <script src="https://cdn.onirix.com/js/ox-sdk.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r136/three.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r136/examples/js/loaders/GLTFLoader.js"></script>
 </head>
 <body>
-    <!-- <model-viewer> HTML element -->
-    <model-viewer id="model-viewer" 
-                  src="90d4862ea1a84b45b63b8a860da94956.glb" 
-                  ar 
-                  ar-modes="webxr scene-viewer quick-look" 
-                  camera-controls 
-                  tone-mapping="neutral" 
-                  poster="poster.webp" 
-                  shadow-intensity="1" 
-                  autoplay>
-        <div class="progress-bar hide" slot="progress-bar">
-            <div class="update-bar"></div>
-        </div>
-        <button slot="ar-button" id="ar-button">View in your space</button>
-        <div id="ar-prompt">
-            <img src="ar_hand_prompt.png" alt="AR Hand Prompt">
-        </div>
-    </model-viewer>
-
-    <div id="button-container">
-        <button data-model="c9c572b946de4f6b9f0fcc7043c23ea0.glb">Model 1</button>
-        <button data-model="90d4862ea1a84b45b63b8a860da94956.glb">Model 2</button>
-        <button data-model="c9c572b946de4f6b9f0fcc7043c23ea0.glb">Model 3</button>
-    </div>
-
-    <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.5.0/model-viewer.min.js"></script>
-    
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const modelViewer = document.getElementById('model-viewer');
+        const sdkKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjUyMDIsInByb2plY3RJZCI6MTQ0MjgsInJvbGUiOjMsImlhdCI6MTYxNjc1ODY5NX0.8F5eAPcBGaHzSSLuQAEgpdja9aEZ6Ca_Ll9wg84Rp5k'; // Replace with your actual SDK key
+        let model; // To store the 3D model
 
-            // Switch model on button click
-            document.querySelectorAll('button[data-model]').forEach(button => {
-                button.addEventListener('click', (event) => {
-                    switchModel(event.target.getAttribute('data-model'));
-                });
+        // Initialize the Onirix SDK
+        Onirix.init({ apiKey: sdkKey }).then(() => {
+            console.log("Onirix initialized successfully");
+
+            // Setup surface tracking
+            const surfaceTracker = new Onirix.SurfaceTracker();
+
+            // Load the GLB model
+            const loader = new THREE.GLTFLoader();
+            loader.load('path/to/your-model.glb', (gltf) => {
+                model = gltf.scene;
+                model.visible = false;  // Initially hide the model
+                Onirix.add(model);      // Add the model to the Onirix scene
             });
 
-            // AR button click event
-            document.getElementById('ar-button').addEventListener('click', () => {
-                if (modelViewer.canRender) {
-                    modelViewer.enterAR();
-                } else {
-                    alert('AR not available');
+            // Add event listener for surface tracking
+            Onirix.on('surfaceTracked', (event) => {
+                if (model) {
+                    model.visible = true;  // Make the model visible
+                    model.position.set(event.position.x, event.position.y, event.position.z);  // Set the position of the model
                 }
+                console.log('Surface tracked at position:', event.position);
             });
+        }).catch(err => {
+            console.error('Failed to initialize Onirix SDK:', err);
         });
-
-        function switchModel(modelSrc) {
-            const modelViewer = document.getElementById('model-viewer');
-            modelViewer.src = modelSrc;
-            modelViewer.pause(); // Pause the model before switching
-        }
     </script>
 </body>
 </html>
