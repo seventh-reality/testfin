@@ -8,7 +8,6 @@
     <style>
         body { margin: 0; }
         #ar-container { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
-        canvas { width: 100%; height: 100%; }
     </style>
 </head>
 <body>
@@ -20,24 +19,32 @@
             onSurfaceDetected: (surface) => {
                 console.log('Surface detected:', surface);
                 loadModelOnSurface(surface);
+            },
+            onError: (error) => {
+                console.error('AR Session Error:', error);
             }
         });
 
         async function loadModelOnSurface(surface) {
             const modelUrl = 'https://yourmodelurl.com/model.glb'; // Replace with your model URL
+            console.log('Loading model from:', modelUrl);
             try {
                 const model = await Onirix.Model.load(modelUrl);
                 session.addModel(model, {
                     position: surface.position,
                     rotation: surface.rotation
                 });
-                console.log('Model loaded:', model);
+                console.log('Model loaded successfully:', model);
             } catch (error) {
                 console.error('Error loading model:', error);
             }
         }
 
-        session.start();
+        session.start().then(() => {
+            console.log('AR session started successfully');
+        }).catch(error => {
+            console.error('Failed to start AR session:', error);
+        });
     </script>
 </body>
 </html>
