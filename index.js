@@ -10,7 +10,7 @@ const MyARScene = ({ selectedModel }) => {
       {/* Load different models based on button press */}
       {selectedModel === 'model1' && (
         <Viro3DObject
-          source={require('./model1.gltf')}
+          source={require('./90d4862ea1a84b45b63b8a860da94956.glb')}
           position={[0, 0, -2]}
           scale={[0.2, 0.2, 0.2]}
           type="GLTF"
