@@ -9,7 +9,7 @@
     <script src="https://cdn.jsdelivr.net/npm/three@0.151.3/build/three.min.js"></script> 
     
     <!-- Load GLTFLoader as a separate module -->
- <script type="module" src="https://cdn.skypack.dev/three@0.136.0/examples/jsm/loaders/GLTFLoader.js"></script> 
+    <script type="module" src="https://cdn.skypack.dev/three@0.136.0/examples/jsm/loaders/GLTFLoader.js"></script> 
 
     <!-- AR.js for surface tracking with Three.js -->
     <script src="https://cdn.jsdelivr.net/gh/AR-js-org/AR.js/three.js/build/ar-threex.js"></script>
@@ -38,20 +38,14 @@
     <button id="button3">Load Model 3</button>
 </div>
 
-<script>
+<script type="module">
+    import { GLTFLoader } from 'https://cdn.skypack.dev/three@0.136.0/examples/jsm/loaders/GLTFLoader.js';
 
-// ... your Three.js scene setup ...
-
-const loader = new GLTFLoader();
-loader.load('path/to/your/model.gltf', function (gltf) {
-  // Add the loaded model to your scene
-  scene.add(gltf.scene);
-});
     let currentModel = null;
-    let modelContainer = document.getElementById('model-container');
-
+    const modelContainer = document.getElementById('model-container');
+    
     // GLTFLoader to load 3D models
-    const loader = new THREE.GLTFLoader();
+    const loader = new GLTFLoader();
 
     // Function to load a GLB model and display it in the AR scene
     function loadModel(path) {
