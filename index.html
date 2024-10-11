@@ -6,9 +6,9 @@
     <title>Onirix Studio Example</title>
     <!-- Load Onirix SDK -->
     <script src="https://cdn.onirix.com/onirix.js"></script>
-    <!-- Load Three.js and GLTFLoader -->
-    <script src="https://cdn.skypack.dev/three@0.136.0"></script>
-    <script src="https://cdn.skypack.dev/three@0.136.0/examples/jsm/loaders/GLTFLoader.js"></script>
+    <!-- Load Three.js and GLTFLoader from the official CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r136/three.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r136/examples/js/loaders/GLTFLoader.js"></script>
     <style>
         body { margin: 0; overflow: hidden; }
         #ui { position: absolute; top: 20px; left: 20px; z-index: 10; }
@@ -49,19 +49,22 @@
                     const surfaceTracker = new Onirix.SurfaceTracker();
 
                     // Load models (use valid paths to your models)
-                    model1 = new Onirix.Model("path/to/model1.glb");
-                    model2 = new Onirix.Model("path/to/model2.glb");
-                    model3 = new Onirix.Model("path/to/model3.glb");
-
-                    // Set initial visibility
-                    model1.visible = false; // Disable model1
-                    model2.visible = true;  // Enable model2
-                    model3.visible = true;  // Enable model3
-
-                    // Add models to the scene
-                    Onirix.add(model1);
-                    Onirix.add(model2);
-                    Onirix.add(model3);
+                    const loader = new THREE.GLTFLoader();
+                    loader.load('path/to/model1.glb', (gltf) => {
+                        model1 = gltf.scene;
+                        model1.visible = false;
+                        Onirix.add(model1);
+                    });
+                    loader.load('path/to/model2.glb', (gltf) => {
+                        model2 = gltf.scene;
+                        model2.visible = true;
+                        Onirix.add(model2);
+                    });
+                    loader.load('path/to/model3.glb', (gltf) => {
+                        model3 = gltf.scene;
+                        model3.visible = true;
+                        Onirix.add(model3);
+                    });
 
                     // Create tracking mesh
                     trackingMesh = new Onirix.Mesh();
@@ -80,7 +83,11 @@
 
                 // Function to play animation without looping
                 function playAnimation(model) {
-                    model.playAnimation("animationName"); // Replace "animationName" with the actual animation name
+                    if (model && model.animations.length > 0) {
+                        const mixer = new THREE.AnimationMixer(model);
+                        const action = mixer.clipAction(model.animations[0]); // Replace with actual animation name if needed
+                        action.play();
+                    }
                 }
 
                 // Handle tap events
@@ -104,18 +111,22 @@
                 // Handle scaling and rotation with gestures
                 Onirix.on("pinch", (event) => {
                     const scaleFactor = event.scale; // Get pinch scale factor
-                    model1.scale.x *= scaleFactor; 
-                    model1.scale.y *= scaleFactor; 
-                    model1.scale.z *= scaleFactor;
-                    model2.scale.x *= scaleFactor; 
-                    model2.scale.y *= scaleFactor; 
-                    model2.scale.z *= scaleFactor;
+                    if (model1) {
+                        model1.scale.setScalar(model1.scale.x * scaleFactor);
+                    }
+                    if (model2) {
+                        model2.scale.setScalar(model2.scale.x * scaleFactor);
+                    }
                 });
 
                 Onirix.on("pan", (event) => {
                     const rotationDelta = event.delta; // Get rotation delta
-                    model1.rotation.y += rotationDelta.x * 0.01; // Rotate model1
-                    model2.rotation.y += rotationDelta.x * 0.01; // Rotate model2
+                    if (model1) {
+                        model1.rotation.y += rotationDelta.x * 0.01; // Rotate model1
+                    }
+                    if (model2) {
+                        model2.rotation.y += rotationDelta.x * 0.01; // Rotate model2
+                    }
                 });
 
                 // Initialize the scene
