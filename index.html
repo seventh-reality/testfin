@@ -7,8 +7,8 @@
     <script src="https://cdn.onirix.com/onirix.js"></script>
     <style>
         body { margin: 0; overflow: hidden; }
-        #ui { position: absolute; top: 20px; left: 20px; }
-        button { margin: 5px; }
+        #ui { position: absolute; top: 20px; left: 20px; z-index: 10; }
+        button { margin: 5px; padding: 10px; }
     </style>
 </head>
 <body>
@@ -24,13 +24,16 @@
 
         // Function to initialize the scene
         function initScene() {
+            // iOS visualization mode adjustment for best tracking
+            Onirix.setIosVisualizationMode(true);
+
             // Create a surface tracker
             const surfaceTracker = new Onirix.SurfaceTracker();
 
             // Load models
-            model1 = new Onirix.Model("90d4862ea1a84b45b63b8a860da94956.glb");
-            model2 = new Onirix.Model("90d4862ea1a84b45b63b8a860da94956.glb");
-            model3 = new Onirix.Model("90d4862ea1a84b45b63b8a860da94956.glb");
+            model1 = new Onirix.Model("path/to/model1.glb");
+            model2 = new Onirix.Model("path/to/model2.glb");
+            model3 = new Onirix.Model("path/to/model3.glb");
 
             // Set initial visibility
             model1.visible = false; // Disable model1
