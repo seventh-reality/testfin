@@ -5,9 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Onirix Studio Example</title>
     <!-- Load Onirix SDK -->
-    <script type="module" src="https://unpkg.com/@onirix/ar-engine-sdk@1.6.5/dist/ox-sdk.esm.js"></script>
-    <script type="module" src="https://cdn.skypack.dev/three@0.136.0"></script>
-    <script type="module" src="https://cdn.skypack.dev/three@0.136.0/examples/jsm/loaders/GLTFLoader.js"></script>
+    <script src="https://cdn.onirix.com/onirix.js"></script>
+    <!-- Load Three.js and GLTFLoader -->
+    <script src="https://cdn.skypack.dev/three@0.136.0"></script>
+    <script src="https://cdn.skypack.dev/three@0.136.0/examples/jsm/loaders/GLTFLoader.js"></script>
     <style>
         body { margin: 0; overflow: hidden; }
         #ui { position: absolute; top: 20px; left: 20px; z-index: 10; }
@@ -22,7 +23,7 @@
     </div>
 
     <script>
-        // Ensure Onirix is loaded
+        // Ensure the window loads correctly before initializing
         window.addEventListener('load', () => {
             if (typeof Onirix === 'undefined') {
                 console.error("Onirix SDK failed to load.");
@@ -32,8 +33,9 @@
             // Add your Onirix SDK key here
             const sdkKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjUyMDIsInByb2plY3RJZCI6MTQ0MjgsInJvbGUiOjMsImlhdCI6MTYxNjc1ODY5NX0.8F5eAPcBGaHzSSLuQAEgpdja9aEZ6Ca_Ll9wg84Rp5k"; // Replace with your actual SDK key
 
-            // Initialize Onirix with SDK key
+            // Initialize Onirix with the SDK key
             Onirix.init({ apiKey: sdkKey }).then(() => {
+                console.log("Onirix initialized successfully");
 
                 // Initialize your variables
                 let model1, model2, model3, trackingMesh;
@@ -46,7 +48,7 @@
                     // Create a surface tracker
                     const surfaceTracker = new Onirix.SurfaceTracker();
 
-                    // Load models
+                    // Load models (use valid paths to your models)
                     model1 = new Onirix.Model("path/to/model1.glb");
                     model2 = new Onirix.Model("path/to/model2.glb");
                     model3 = new Onirix.Model("path/to/model3.glb");
