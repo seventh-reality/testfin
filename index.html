@@ -9,7 +9,7 @@
   </head>
   <body>
     <!-- <model-viewer> HTML element -->
-    <model-viewer src="c9c572b946de4f6b9f0fcc7043c23ea0.glb" ar ar-modes="webxr scene-viewer quick-look" camera-controls tone-mapping="neutral" poster="poster.webp" shadow-intensity="1" autoplay>
+    <model-viewer id="model-viewer" src="model1.glb" ar ar-modes="webxr scene-viewer quick-look" camera-controls tone-mapping="neutral" poster="poster.webp" shadow-intensity="1" autoplay>
       <div class="progress-bar hide" slot="progress-bar">
           <div class="update-bar"></div>
       </div>
@@ -20,8 +20,22 @@
           <img src="ar_hand_prompt.png">
       </div>
     </model-viewer>  
+
+    <div>
+      <button onclick="switchModel('model1.glb')">Model 1</button>
+      <button onclick="switchModel('model2.glb')">Model 2</button>
+      <button onclick="switchModel('model3.glb')">Model 3</button>
+    </div>
+
     <script src="script.js"></script>
     <!-- Loads <model-viewer> for browsers: -->
     <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.5.0/model-viewer.min.js"></script>
+
+    <script>
+      function switchModel(modelSrc) {
+        const modelViewer = document.getElementById('model-viewer');
+        modelViewer.src = modelSrc;
+      }
+    </script>
   </body>
 </html>
