@@ -3,49 +3,69 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Model Viewer with AR Controls</title>
+    <title>AR Model Viewer</title>
     <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
     <style>
-        body { margin: 0; display: flex; flex-direction: column; height: 100vh; }
-        model-viewer { flex: 1; }
-        .controls { padding: 10px; background: rgba(255, 255, 255, 0.8); }
-        button { margin: 5px; }
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+        }
+        model-viewer {
+            width: 100%;
+            height: 100%;
+            max-height: 500px;
+        }
+        button {
+            margin: 10px;
+            padding: 10px 20px;
+            font-size: 16px;
+        }
     </style>
 </head>
 <body>
-    <model-viewer 
-        id="modelViewer"
-        src="https://yourmodelurl.com/model.glb" 
-        alt="A 3D model"
-        auto-rotate 
-        camera-controls 
-        ar 
-        ar-modes="webxr scene-viewer quick-look">
-    </model-viewer>
-    
-    <div class="controls">
-        <button id="enterAR">Enter AR</button>
-        <button id="exitAR">Exit AR</button>
-        <button id="resetView">Reset View</button>
-    </div>
 
-    <script>
-        const modelViewer = document.getElementById('modelViewer');
-        const enterARButton = document.getElementById('enterAR');
-        const exitARButton = document.getElementById('exitAR');
-        const resetViewButton = document.getElementById('resetView');
+<model-viewer id="modelViewer" 
+    src="model1.glb" 
+    alt="A 3D model" 
+    auto-rotate 
+    camera-controls 
+    ar 
+    ar-modes="webxr" 
+    style="display: none;">
+</model-viewer>
 
-        enterARButton.addEventListener('click', () => {
-            modelViewer.enterAR();
-        });
+<div>
+    <button onclick="switchModel('model1.glb')">Model 1</button>
+    <button onclick="switchModel('model2.glb')">Model 2</button>
+    <button onclick="switchModel('model3.glb')">Model 3</button>
+    <button onclick="toggleAR()">Toggle AR</button>
+</div>
 
-        exitARButton.addEventListener('click', () => {
-            modelViewer.exitAR();
-        });
+<script>
+    const modelViewer = document.getElementById('modelViewer');
 
-        resetViewButton.addEventListener('click', () => {
-            modelViewer.reset();
-        });
-    </script>
+    function switchModel(model) {
+        modelViewer.src = model;
+        modelViewer.style.display = 'block'; // Show the model viewer when switching models
+    }
+
+    function toggleAR() {
+        if (modelViewer.getAttribute('ar')) {
+            modelViewer.removeAttribute('ar');
+            modelViewer.style.display = 'none'; // Hide if AR is toggled off
+        } else {
+            modelViewer.setAttribute('ar', '');
+            modelViewer.style.display = 'block'; // Show again if AR is toggled on
+        }
+    }
+
+    // Show the initial model viewer
+    switchModel('model1.glb');
+</script>
+
 </body>
 </html>
