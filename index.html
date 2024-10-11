@@ -4,11 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Three.js with AR.js - Surface Tracking</title>
-    <!-- AR.js for surface tracking -->
-    <script src="https://cdn.jsdelivr.net/gh/AR-js-org/AR.js/three.js/build/ar.js"></script>
-    <!-- Three.js -->
+
+    <!-- Three.js (Load Three.js first to ensure it's available for AR.js) -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r136/three.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r136/examples/js/loaders/GLTFLoader.js"></script>
+
+    <!-- AR.js for surface tracking with Three.js -->
+    <script src="https://cdn.jsdelivr.net/gh/AR-js-org/AR.js/three.js/build/ar-threex.js"></script>
+
     <style>
         body { margin: 0; overflow: hidden; }
         #ui { position: absolute; top: 20px; left: 20px; z-index: 10; }
@@ -57,15 +60,15 @@
 
     // Set event listeners for buttons
     document.getElementById('button1').addEventListener('click', () => {
-        loadModel('90d4862ea1a84b45b63b8a860da94956.glb'); // Replace with the actual path to Model 1
+        loadModel('path/to/your-model1.glb'); // Replace with the actual path to Model 1
     });
 
     document.getElementById('button2').addEventListener('click', () => {
-        loadModel('c9c572b946de4f6b9f0fcc7043c23ea0.glb'); // Replace with the actual path to Model 2
+        loadModel('path/to/your-model2.glb'); // Replace with the actual path to Model 2
     });
 
     document.getElementById('button3').addEventListener('click', () => {
-        loadModel('90d4862ea1a84b45b63b8a860da94956.glb'); // Replace with the actual path to Model 3
+        loadModel('path/to/your-model3.glb'); // Replace with the actual path to Model 3
     });
 </script>
 
