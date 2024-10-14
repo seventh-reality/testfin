@@ -1,86 +1,228 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Three.js with AR.js - Surface Tracking</title>
+<html>
+    <head>
+        <meta charset="utf-8"/>
+        <link rel="shortcut icon" href="#" />
+        <title>Babylon.js WebAR SDK</title>
+        <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,shrink-to-fit=no,user-scalable=no,viewport-fit=cover">
+        <meta name="mobile-web-app-capable" content="yes">
+        <meta name="theme-color" content="black">
 
-    <!-- A-Frame and AR.js -->
-    <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/gh/AR-js-org/AR.js/aframe/build/aframe-ar.js"></script>
+        <!-- Babylon.js -->
+        <script src="https://cdn.babylonjs.com/babylon.js"></script>
+        <script src="https://cdn.babylonjs.com/loaders/babylonjs.loaders.min.js"></script>
 
-    <style>
-        body { margin: 0; overflow: hidden; }
-        #ui { position: absolute; top: 20px; left: 20px; z-index: 10; }
-        button { margin: 5px; padding: 10px; }
-    </style>
-</head>
+        <!-- WebAR SDK -->
+        <!-- PS: User may overload the splash screen by passing function string to on-load parameter
+         e.g. on-load = "LoadMySplash()" -->
+
+        <script src="../../webar-sdk/webar-sdk-v1.5.1.min.js?license-key=xxxxxxxx-1111-2222-3333-yyyyyyyyyyyy"
+          on-load=""
+          webar-mode="surface-tracking"
+          auto-init="true"
+          auto-start="true"
+          static-camera="true"
+          rendering-engine="babylonjs"
+          logo-src="./images/test_logo_here.png"
+          logo-width="116px"
+          logo-height="116px"
+          progress-dot-ring-scale="0.30"
+          progress-dot-ring-color="#00AAFF"
+          progress-ring-scale="0.36"
+          progress-ring-color="#00FFFF"
+          progress-ring-line-width="5"
+
+          alert-border-color="#00FFFF"
+          alert-border-width="5px"
+          alert-background-color="#283747"
+          alert-message-text-color="#00AAFF"
+          alert-button-color="#00FFFF"
+          alert-button-text-color="#283747"
+          alert-button-height="50px"
+          alert-camera-permission-text="We need to ask for access to the camera so this experience can work!!!"
+          alert-camera-permission-button-text="No Problem"
+          alert-motion-permission-text="Now we need access to motion sensors!!!"
+          alert-motion-permission-button-text="No Problem"
+          alert-box-width="290px"
+          alert-box-height="182px"
+          alert-box-font-size="24px"
+
+          ui-background-color="#283747"
+          ui-text-color="#00FFFF"
+          ui-portrait-text="This experience is optimised for portrait display only"
+          desktop-logo-src="./images/test_desktop_logo.png"
+          desktop-logo-width="108px"
+          desktop-logo-height="30px"
+          issue-img-src="./images/test_issue_img.png"
+          issue-img-width="116px"
+          issue-img-height="116px"
+          show-guide-view="true"></script>
+
+        <style>
+            #renderCanvas {
+              position: absolute;
+              left: 0;
+              top: 0;
+              width: 100vw;
+              height: 100vh;
+              touch-action: none;
+            }
+        </style>
+    </head>
 <body>
+    <canvas id="renderCanvas"></canvas>
+    <script>
+        var canvas = document.getElementById("renderCanvas");
 
-<!-- AR.js Scene with Surface Tracking -->
-<a-scene embedded arjs="sourceType: webcam; trackingMethod: best;">
-    <!-- Hit-test target for surface detection -->
-    <a-anchor hit-testing-enabled="true" id="hit-test-anchor">
-        <a-entity id="model-container"></a-entity>
-    </a-anchor>
-    <a-camera gps-camera rotation-reader fov="60"></a-camera> <!-- Fixed FOV -->
-</a-scene>
-
-<!-- UI Buttons to Switch Models -->
-<div id="ui">
-    <button id="button1">Load Model 1</button>
-    <button id="button2">Load Model 2</button>
-    <button id="button3">Load Model 3</button>
-</div>
-
-<script type="module">
-    import { GLTFLoader } from 'https://cdn.skypack.dev/three@0.136.0/examples/jsm/loaders/GLTFLoader.js';
-
-    let currentModel = null;
-    const modelContainer = document.getElementById('model-container');
-    const hitTestAnchor = document.getElementById('hit-test-anchor');
-    
-    // GLTFLoader to load 3D models
-    const loader = new GLTFLoader();
-
-    // Function to load a GLB model and display it in the AR scene
-    function loadModel(path) {
-        // Remove the current model if it exists
-        if (currentModel) {
-            modelContainer.object3D.remove(currentModel);
+        var engine = null;
+        var sceneToRender = null;
+        var webarStage = null;
+        var scaleByFactor = function(obj, factor) {
+            obj.scaling.x = obj.scaling.x * factor;
+            obj.scaling.y = obj.scaling.y * factor;
+            obj.scaling.z = obj.scaling.z * factor;
         }
 
-        // Load the new model
-        loader.load(path, (gltf) => {
-            currentModel = gltf.scene;
-            currentModel.scale.set(0.5, 0.5, 0.5);  // Scale the model
-            modelContainer.object3D.add(currentModel);
+        var createDefaultEngine = function() { return new BABYLON.Engine(canvas, true, { preserveDrawingBuffer: true, stencil: true,  disableWebGL2Support: false}); };
+        var createScene = function () {
+            var scene = new BABYLON.Scene(engine);
+            scene.environmentTexture = BABYLON.CubeTexture.CreateFromPrefilteredData("./models/environment.dds", scene);
+
+            var camera = new BABYLON.UniversalCamera("camera1", new BABYLON.Vector3(0, 0, 0), scene);
+
+            var light = new BABYLON.HemisphericLight("HemiLight", new BABYLON.Vector3(5, 10, -2), scene);
+            light.intensity = 0.7;
+
+            // Create an empty webarStage mesh. Models/meshes appended as a children to this webarStage mesh will be displayed on the surface.
+            webarStage = new BABYLON.Mesh("webarStage", scene);
+
+            // Create a time varying PBR material for the base cylinder mesh
+            var pbr = new BABYLON.PBRMaterial("pbr", scene);
+            pbr.metallic = 0.0;
+            pbr.roughness = 0;
+            pbr.subSurface.isRefractionEnabled = true;
+            pbr.subSurface.indexOfRefraction = 1.5;
+            pbr.subSurface.tintColor = new BABYLON.Color3(0.5, 0, 0);
+            var a = 0;
+            scene.beforeRender = () => {
+                a += 0.05;
+                pbr.subSurface.tintColor.g = Math.cos(a) * 0.5 + 0.5;
+                pbr.subSurface.tintColor.b = pbr.subSurface.tintColor.g;
+            }
+
+            // Create primitive shape using mesh builder and set webarStage as its parent so that it appears on the surface
+            var cylinder = BABYLON.MeshBuilder.CreateCylinder("cylinder", {height: 0.5, diameterTop: 1, diameterBottom: 1, tessellation: 128}, scene);
+            cylinder.material = pbr;
+            cylinder.position.y = 0.125;
+            cylinder.position.z = -0.075;
+            cylinder.setParent(webarStage);
+
+            // Start spark and smoke particles
+            startParticles(scene, webarStage);
+
+            // Import a gltf model to the scene and scale appropriately. No need to set the parent to webarStage mesh.
+            // All gltf models imported to the scene are created under __root__ node by babylon.
+            // After the complete scene is ready, it is models under __root_ node are moved to webarStage mesh
+            // to appear on the surface
+            BABYLON.SceneLoader.ImportMesh(['Object_2'], "./models/", "oscar_trophy.glb", scene, function (meshes, particleSystems, skeletons) {
+                let xQuat = new BABYLON.Quaternion();
+                BABYLON.Quaternion.FromEulerAnglesToRef(Math.PI / 2, 0, 0, xQuat);
+
+                for (mesh of meshes) {
+                    if (mesh.name !== '__root__') {
+                        // Move the loaded models to webarStage
+                        mesh.setParent(webarStage);
+                        mesh.rotationQuaternion.multiplyInPlace(xQuat);
+
+                        scaleByFactor(mesh, 0.0375);
+                    }
+                }
+            });
+
+            // Pass babylon canvas, scene, camera and webarStage mesh to WebarSdk to initialize surface tracking
+            WEBARSDK.InitBabylonJs(canvas, scene, camera, webarStage);
+
+            return scene;
+        };
+
+        var sparksystem = null;
+        var smokesystem = null;
+
+        var startParticles = function (scene, fountain) {
+            let sphereSpark = BABYLON.MeshBuilder.CreateSphere("sphereSpark", {diameter: 0.4, segments: 32}, scene);
+            sphereSpark.isVisible = false;
+            sphereSpark.setParent(fountain);
+            BABYLON.ParticleHelper.ParseFromFileAsync(null, "./models/spark_particles.json", scene, false).then(system => {
+                sparksystem = system;
+                system.emitter = sphereSpark;
+            });
+            let sphereSmoke = BABYLON.MeshBuilder.CreateSphere("sphereSmoke", {diameter: 1.9, segments: 32}, scene);
+            sphereSmoke.isVisible = false;
+            sphereSmoke.setParent(fountain);
+            BABYLON.ParticleHelper.ParseFromFileAsync(null, "./models/smoke_particles.json", scene, false).then(system => {
+                smokesystem = system;
+                system.emitter = sphereSmoke;
+            });
+        };
+
+        window.initFunction = async function() {
+            var asyncEngineCreation = async function() {
+                try {
+                    return createDefaultEngine();
+                } catch(e) {
+                console.log("the available createEngine function failed. Creating the default engine instead");
+                    return createDefaultEngine();
+                }
+            }
+
+            window.engine = await asyncEngineCreation();
+            if (!engine) throw 'engine should not be null.';
+            window.scene = createScene();
+        };
+
+        initFunction().then(() => {
+            sceneToRender = window.scene;
+            sceneToRender.executeWhenReady(function () {
+                engine.runRenderLoop(function () {
+                    if (sceneToRender && sceneToRender.activeCamera) {
+                        sceneToRender.render();
+                    }
+                });
+            });
         });
-    }
 
-    // Set event listeners for buttons
-    document.getElementById('button1').addEventListener('click', () => {
-        loadModel('90d4862ea1a84b45b63b8a860da94956.glb'); // Replace with actual path to Model 1
-    });
+        window.addEventListener("resize", function () {
+            engine.resize();
+        });
 
-    document.getElementById('button2').addEventListener('click', () => {
-        loadModel('c9c572b946de4f6b9f0fcc7043c23ea0.glb'); // Replace with actual path to Model 2
-    });
+        WEBARSDK.SetStageReadyCallback(() => {
+            console.info('Stage is ready now!!!');
 
-    document.getElementById('button3').addEventListener('click', () => {
-        loadModel('90d4862ea1a84b45b63b8a860da94956.glb'); // Replace with actual path to Model 3
-    });
+            // Start spark and smoke particles
+            var toggleCounter = 0;
+            setInterval(() => {
+                console.log('Restart spark');
 
-    // Function to place the model at the detected hit-test surface
-    hitTestAnchor.addEventListener('hit-test-select', (e) => {
-        const position = e.detail.intersection.point;
-        const rotation = e.detail.intersection.face.normal;
+                if (toggleCounter % 2 === 0) {
+                    if (sparksystem !== null) {
+                        sparksystem.stop();
+                        sparksystem.reset();
+                        sparksystem.start()
+                    }
+                }
+                else {
+                    if (smokesystem !== null) {
+                        smokesystem.stop();
+                        smokesystem.reset();
+                        smokesystem.start();
+                    }
+                }
 
-        // Place the model at the hit-test location
-        hitTestAnchor.setAttribute('position', position);
-        hitTestAnchor.setAttribute('rotation', rotation);
-    });
-</script>
+                ++toggleCounter;
+            },
+            3000);
+        });
 
+    </script>
 </body>
 </html>
