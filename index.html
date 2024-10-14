@@ -1,228 +1,85 @@
 <!DOCTYPE html>
-<html>
-    <head>
-        <meta charset="utf-8"/>
-        <link rel="shortcut icon" href="#" />
-        <title>Babylon.js WebAR SDK</title>
-        <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,shrink-to-fit=no,user-scalable=no,viewport-fit=cover">
-        <meta name="mobile-web-app-capable" content="yes">
-        <meta name="theme-color" content="black">
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="icon" href="%PUBLIC_URL%/favicon.ico" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#000000" />
+    <meta
+      name="description"
+      content="Web site created using create-react-app"
+    />
+    <link rel="apple-touch-icon" href="%PUBLIC_URL%/logo192.png" />
+    <!--
+      manifest.json provides metadata used when your web app is installed on a
+      user's mobile device or desktop. See https://developers.google.com/web/fundamentals/web-app-manifest/
+    -->
+    <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
+    <!--
+      Notice the use of %PUBLIC_URL% in the tags above.
+      It will be replaced with the URL of the `public` folder during the build.
+      Only files inside the `public` folder can be referenced from the HTML.
 
-        <!-- Babylon.js -->
-        <script src="https://cdn.babylonjs.com/babylon.js"></script>
-        <script src="https://cdn.babylonjs.com/loaders/babylonjs.loaders.min.js"></script>
+      Unlike "/favicon.ico" or "favicon.ico", "%PUBLIC_URL%/favicon.ico" will
+      work correctly both with client-side routing and a non-root public URL.
+      Learn how to configure a non-root public URL by running `npm run build`.
+    -->
+    <title>React App</title>
 
-        <!-- WebAR SDK -->
-        <!-- PS: User may overload the splash screen by passing function string to on-load parameter
-         e.g. on-load = "LoadMySplash()" -->
+    <script src="https://ar-libs.blippar.com/aframe/1.3.0/aframe-v1.3.0.min.js"></script>
+    <script src="/webar-sdk/webar-sdk-v1.5.1.min.js"
+      webar-mode="surface-tracking"
+      auto-init="true"
+      auto-start="true"
+      static-camera="true"
+      logo-src="images/test_logo_here.png"
+      logo-width="116px"
+      logo-height="116px"
+      progress-dot-ring-scale="0.30"
+      progress-dot-ring-color="#00AAFF"
+      progress-ring-scale="0.36"
+      progress-ring-color="#00FFFF"
+      progress-ring-line-width="5"
 
-        <script src="../../webar-sdk/webar-sdk-v1.5.1.min.js?license-key=xxxxxxxx-1111-2222-3333-yyyyyyyyyyyy"
-          on-load=""
-          webar-mode="surface-tracking"
-          auto-init="true"
-          auto-start="true"
-          static-camera="true"
-          rendering-engine="babylonjs"
-          logo-src="./images/test_logo_here.png"
-          logo-width="116px"
-          logo-height="116px"
-          progress-dot-ring-scale="0.30"
-          progress-dot-ring-color="#00AAFF"
-          progress-ring-scale="0.36"
-          progress-ring-color="#00FFFF"
-          progress-ring-line-width="5"
+      alert-border-color="#00FFFF"
+      alert-border-width="5px"
+      alert-background-color="#283747"
+      alert-message-text-color="#00AAFF"
+      alert-button-color="#00FFFF"
+      alert-button-text-color="#283747"
+      alert-button-height="50px"
+      alert-camera-permission-text="We need to ask for access to the camera so this experience can work!!!"
+      alert-camera-permission-button-text="No Problem"
+      alert-motion-permission-text="Now we need access to motion sensors!!!"
+      alert-motion-permission-button-text="No Problem"
+      alert-box-width="290px"
+      alert-box-height="182px"
+      alert-box-font-size="24px"
 
-          alert-border-color="#00FFFF"
-          alert-border-width="5px"
-          alert-background-color="#283747"
-          alert-message-text-color="#00AAFF"
-          alert-button-color="#00FFFF"
-          alert-button-text-color="#283747"
-          alert-button-height="50px"
-          alert-camera-permission-text="We need to ask for access to the camera so this experience can work!!!"
-          alert-camera-permission-button-text="No Problem"
-          alert-motion-permission-text="Now we need access to motion sensors!!!"
-          alert-motion-permission-button-text="No Problem"
-          alert-box-width="290px"
-          alert-box-height="182px"
-          alert-box-font-size="24px"
+      ui-background-color="#283747"
+      ui-text-color="#00FFFF"
+      ui-portrait-text="This experience is optimised for portrait display only"
+      desktop-logo-src="images/test_desktop_logo.png"
+      desktop-logo-width="108px"
+      desktop-logo-height="30px"
+      issue-img-src="images/test_issue_img.png"
+      issue-img-width="116px"
+      issue-img-height="116px"
+      show-guide-view="true"
+      show-guide-animation-url=""></script>
+  </head>
+  <body>
+    <noscript>You need to enable JavaScript to run this app.</noscript>
+    <div id="root"></div>
+    <!--
+      This HTML file is a template.
+      If you open it directly in the browser, you will see an empty page.
 
-          ui-background-color="#283747"
-          ui-text-color="#00FFFF"
-          ui-portrait-text="This experience is optimised for portrait display only"
-          desktop-logo-src="./images/test_desktop_logo.png"
-          desktop-logo-width="108px"
-          desktop-logo-height="30px"
-          issue-img-src="./images/test_issue_img.png"
-          issue-img-width="116px"
-          issue-img-height="116px"
-          show-guide-view="true"></script>
+      You can add webfonts, meta tags, or analytics to this file.
+      The build step will place the bundled scripts into the <body> tag.
 
-        <style>
-            #renderCanvas {
-              position: absolute;
-              left: 0;
-              top: 0;
-              width: 100vw;
-              height: 100vh;
-              touch-action: none;
-            }
-        </style>
-    </head>
-<body>
-    <canvas id="renderCanvas"></canvas>
-    <script>
-        var canvas = document.getElementById("renderCanvas");
-
-        var engine = null;
-        var sceneToRender = null;
-        var webarStage = null;
-        var scaleByFactor = function(obj, factor) {
-            obj.scaling.x = obj.scaling.x * factor;
-            obj.scaling.y = obj.scaling.y * factor;
-            obj.scaling.z = obj.scaling.z * factor;
-        }
-
-        var createDefaultEngine = function() { return new BABYLON.Engine(canvas, true, { preserveDrawingBuffer: true, stencil: true,  disableWebGL2Support: false}); };
-        var createScene = function () {
-            var scene = new BABYLON.Scene(engine);
-            scene.environmentTexture = BABYLON.CubeTexture.CreateFromPrefilteredData("./models/environment.dds", scene);
-
-            var camera = new BABYLON.UniversalCamera("camera1", new BABYLON.Vector3(0, 0, 0), scene);
-
-            var light = new BABYLON.HemisphericLight("HemiLight", new BABYLON.Vector3(5, 10, -2), scene);
-            light.intensity = 0.7;
-
-            // Create an empty webarStage mesh. Models/meshes appended as a children to this webarStage mesh will be displayed on the surface.
-            webarStage = new BABYLON.Mesh("webarStage", scene);
-
-            // Create a time varying PBR material for the base cylinder mesh
-            var pbr = new BABYLON.PBRMaterial("pbr", scene);
-            pbr.metallic = 0.0;
-            pbr.roughness = 0;
-            pbr.subSurface.isRefractionEnabled = true;
-            pbr.subSurface.indexOfRefraction = 1.5;
-            pbr.subSurface.tintColor = new BABYLON.Color3(0.5, 0, 0);
-            var a = 0;
-            scene.beforeRender = () => {
-                a += 0.05;
-                pbr.subSurface.tintColor.g = Math.cos(a) * 0.5 + 0.5;
-                pbr.subSurface.tintColor.b = pbr.subSurface.tintColor.g;
-            }
-
-            // Create primitive shape using mesh builder and set webarStage as its parent so that it appears on the surface
-            var cylinder = BABYLON.MeshBuilder.CreateCylinder("cylinder", {height: 0.5, diameterTop: 1, diameterBottom: 1, tessellation: 128}, scene);
-            cylinder.material = pbr;
-            cylinder.position.y = 0.125;
-            cylinder.position.z = -0.075;
-            cylinder.setParent(webarStage);
-
-            // Start spark and smoke particles
-            startParticles(scene, webarStage);
-
-            // Import a gltf model to the scene and scale appropriately. No need to set the parent to webarStage mesh.
-            // All gltf models imported to the scene are created under __root__ node by babylon.
-            // After the complete scene is ready, it is models under __root_ node are moved to webarStage mesh
-            // to appear on the surface
-            BABYLON.SceneLoader.ImportMesh(['Object_2'], "./models/", "oscar_trophy.glb", scene, function (meshes, particleSystems, skeletons) {
-                let xQuat = new BABYLON.Quaternion();
-                BABYLON.Quaternion.FromEulerAnglesToRef(Math.PI / 2, 0, 0, xQuat);
-
-                for (mesh of meshes) {
-                    if (mesh.name !== '__root__') {
-                        // Move the loaded models to webarStage
-                        mesh.setParent(webarStage);
-                        mesh.rotationQuaternion.multiplyInPlace(xQuat);
-
-                        scaleByFactor(mesh, 0.0375);
-                    }
-                }
-            });
-
-            // Pass babylon canvas, scene, camera and webarStage mesh to WebarSdk to initialize surface tracking
-            WEBARSDK.InitBabylonJs(canvas, scene, camera, webarStage);
-
-            return scene;
-        };
-
-        var sparksystem = null;
-        var smokesystem = null;
-
-        var startParticles = function (scene, fountain) {
-            let sphereSpark = BABYLON.MeshBuilder.CreateSphere("sphereSpark", {diameter: 0.4, segments: 32}, scene);
-            sphereSpark.isVisible = false;
-            sphereSpark.setParent(fountain);
-            BABYLON.ParticleHelper.ParseFromFileAsync(null, "./models/spark_particles.json", scene, false).then(system => {
-                sparksystem = system;
-                system.emitter = sphereSpark;
-            });
-            let sphereSmoke = BABYLON.MeshBuilder.CreateSphere("sphereSmoke", {diameter: 1.9, segments: 32}, scene);
-            sphereSmoke.isVisible = false;
-            sphereSmoke.setParent(fountain);
-            BABYLON.ParticleHelper.ParseFromFileAsync(null, "./models/smoke_particles.json", scene, false).then(system => {
-                smokesystem = system;
-                system.emitter = sphereSmoke;
-            });
-        };
-
-        window.initFunction = async function() {
-            var asyncEngineCreation = async function() {
-                try {
-                    return createDefaultEngine();
-                } catch(e) {
-                console.log("the available createEngine function failed. Creating the default engine instead");
-                    return createDefaultEngine();
-                }
-            }
-
-            window.engine = await asyncEngineCreation();
-            if (!engine) throw 'engine should not be null.';
-            window.scene = createScene();
-        };
-
-        initFunction().then(() => {
-            sceneToRender = window.scene;
-            sceneToRender.executeWhenReady(function () {
-                engine.runRenderLoop(function () {
-                    if (sceneToRender && sceneToRender.activeCamera) {
-                        sceneToRender.render();
-                    }
-                });
-            });
-        });
-
-        window.addEventListener("resize", function () {
-            engine.resize();
-        });
-
-        WEBARSDK.SetStageReadyCallback(() => {
-            console.info('Stage is ready now!!!');
-
-            // Start spark and smoke particles
-            var toggleCounter = 0;
-            setInterval(() => {
-                console.log('Restart spark');
-
-                if (toggleCounter % 2 === 0) {
-                    if (sparksystem !== null) {
-                        sparksystem.stop();
-                        sparksystem.reset();
-                        sparksystem.start()
-                    }
-                }
-                else {
-                    if (smokesystem !== null) {
-                        smokesystem.stop();
-                        smokesystem.reset();
-                        smokesystem.start();
-                    }
-                }
-
-                ++toggleCounter;
-            },
-            3000);
-        });
-
-    </script>
-</body>
+      To begin the development, run `npm start` or `yarn start`.
+      To create a production bundle, use `npm run build` or `yarn build`.
+    -->
+  </body>
 </html>
