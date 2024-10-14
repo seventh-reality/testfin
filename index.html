@@ -32,6 +32,12 @@
         document.getElementById('start-button').addEventListener('click', init);
 
         async function init() {
+            // Check for WebXR support
+            if (!navigator.xr) {
+                alert('WebXR not supported');
+                return;
+            }
+
             // Hide the start button
             document.getElementById('start-button').style.display = 'none';
 
@@ -42,23 +48,21 @@
             document.body.appendChild(renderer.domElement);
 
             // Set up XR
-            if (navigator.xr) {
-                const session = await navigator.xr.requestSession('immersive-ar', { requiredFeatures: ['hit-test'] });
-                renderer.xr.enabled = true;
-                renderer.xr.setSession(session);
+            const session = await navigator.xr.requestSession('immersive-ar', { requiredFeatures: ['hit-test'] });
+            renderer.xr.enabled = true;
+            renderer.xr.setSession(session);
 
-                // Add hit test source
-                hitTestSource = await session.requestHitTestSource({ space: renderer.xr.getReferenceSpace() });
-                
-                session.addEventListener('end', () => {
-                    if (model) scene.remove(model);
-                });
+            // Add hit test source
+            hitTestSource = await session.requestHitTestSource({ space: renderer.xr.getReferenceSpace() });
 
-                controller = renderer.xr.getController(0);
-                scene.add(controller);
+            session.addEventListener('end', () => {
+                if (model) scene.remove(model);
+            });
 
-                session.requestAnimationFrame(onXRFrame);
-            }
+            controller = renderer.xr.getController(0);
+            scene.add(controller);
+
+            session.requestAnimationFrame(onXRFrame);
         }
 
         function onXRFrame(time, frame) {
@@ -71,9 +75,10 @@
                 const hit = hitTestResults[0];
                 if (!model) {
                     loadGLBModel();
+                } else {
+                    model.position.copy(hit.getPose(referenceSpace).transform.position);
+                    model.quaternion.copy(hit.getPose(referenceSpace).transform.orientation);
                 }
-                model.position.copy(hit.getPose(referenceSpace).transform.position);
-                model.quaternion.copy(hit.getPose(referenceSpace).transform.orientation);
             }
 
             renderer.render(scene, camera);
@@ -85,6 +90,8 @@
                 model = gltf.scene;
                 model.scale.set(0.5, 0.5, 0.5); // Scale the model if necessary
                 scene.add(model);
+            }, undefined, function (error) {
+                console.error('An error occurred while loading the model', error);
             });
         }
 
