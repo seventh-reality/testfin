@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Three.js + AR.js Surface Tracking</title>
+    <title>AR.js + Three.js Surface Tracking</title>
     <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
     <script src="https://cdn.rawgit.com/jeromeetienne/ar.js/2.0.3/aframe/build/aframe-ar.js"></script>
     <script src="https://threejs.org/build/three.js"></script>
@@ -19,40 +19,71 @@
 <body>
     <!-- AR.js Scene -->
     <a-scene embedded arjs="sourceType: webcam; debugUIEnabled: false;" vr-mode-ui="enabled: false">
-        
-        <!-- Surface Tracking Plane -->
-        <a-entity id="surfacePlane" geometry="primitive: plane; height: 0.5; width: 0.5" 
-                  material="color: lightblue; opacity: 0.5" 
-                  position="0 0 0" 
-                  rotation="-90 0 0" 
-                  visible="false">
-        </a-entity>
-        
-        <!-- Add GLB Model Here -->
-        <a-entity id="glb-model" gltf-model="url(tree.glb)" 
-                  scale="0.5 0.5 0.5" 
+        <!-- Surface Hit Testing Visual -->
+        <a-entity id="surface-plane" geometry="primitive: plane; width: 1; height: 1;" 
+                  material="color: lightblue; opacity: 0.5;" 
+                  position="0 0 0" rotation="-90 0 0" 
+                  visible="false"></a-entity>
+
+        <!-- 3D Model (GLB) to be placed on detected surface -->
+        <a-entity id="glb-model" gltf-model="url(/path-to-your-model/model.glb)" 
+                  scale="0.2 0.2 0.2" 
                   position="0 0 0" 
                   visible="false">
         </a-entity>
 
-        <!-- AR.js camera -->
-        <a-entity camera></a-entity>
+        <!-- AR.js Camera with fixed FOV -->
+        <a-entity camera="fov: 75"></a-entity>
     </a-scene>
 
     <script>
-        let scene = document.querySelector('a-scene');
-        let glbModel = document.getElementById('glb-model');
-        let surfacePlane = document.getElementById('surfacePlane');
+        // Initialize GLTF loader for the .glb model
+        const scene = document.querySelector('a-scene');
+        const glbModel = document.getElementById('glb-model');
+        const surfacePlane = document.getElementById('surface-plane');
+        let hitTestSource = null;
+        let localSpace = null;
+        let isHitTestSupported = false;
 
-        scene.addEventListener('click', function (event) {
-            if (glbModel.getAttribute('visible') === false) {
-                glbModel.setAttribute('visible', true);
-                surfacePlane.setAttribute('visible', true);
-            } else {
-                let intersection = event.detail.intersection;
-                if (intersection) {
-                    let newPosition = intersection.point;
-                    glbModel.setAttribute('position', newPosition);
+        scene.addEventListener('loaded', function () {
+            // Initialize AR hit test for surface detection
+            const session = scene.renderer.xr.getSession();
+
+            session.requestReferenceSpace('viewer').then((space) => {
+                localSpace = space;
+                session.requestHitTestSource({ space: localSpace }).then((source) => {
+                    hitTestSource = source;
+                });
+            });
+
+            session.addEventListener('end', () => {
+                hitTestSource = null;
+                localSpace = null;
+                isHitTestSupported = false;
+            });
+
+            isHitTestSupported = true;
+        });
+
+        scene.addEventListener('tick', () => {
+            if (hitTestSource && isHitTestSupported) {
+                const frame = scene.renderer.xr.getFrame();
+
+                // Perform the hit test
+                const hitTestResults = frame.getHitTestResults(hitTestSource);
+                if (hitTestResults.length > 0) {
+                    const hit = hitTestResults[0];
+                    const hitPose = hit.getPose(localSpace);
+
+                    // Set the surface plane's position based on hit test result
+                    surfacePlane.setAttribute('visible', true);
+                    surfacePlane.object3D.position.copy(hitPose.transform.position);
+                    surfacePlane.object3D.quaternion.copy(hitPose.transform.orientation);
+
+                    // Show the model and position it
+                    glbModel.setAttribute('visible', true);
+                    glbModel.object3D.position.copy(hitPose.transform.position);
+                    glbModel.object3D.quaternion.copy(hitPose.transform.orientation);
                 }
             }
         });
