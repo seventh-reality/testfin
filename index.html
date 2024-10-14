@@ -9,6 +9,10 @@
     <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
     <script src="https://cdn.jsdelivr.net/gh/AR-js-org/AR.js/aframe/build/aframe-ar.js"></script>
 
+    <!-- Three.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r136/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.136.0/examples/js/loaders/GLTFLoader.js"></script>
+
     <style>
         body { margin: 0; overflow: hidden; }
         #ui { position: absolute; top: 20px; left: 20px; z-index: 10; }
@@ -44,13 +48,21 @@
 </div>
 
 <script type="module">
-    import { GLTFLoader } from 'https://cdn.skypack.dev/three@0.136.0/examples/jsm/loaders/GLTFLoader.js';
+    import { GLTFLoader } from 'https://cdn.jsdelivr.net/npm/three/examples/jsm/loaders/GLTFLoader.js';
 
     let currentModel = null;
     const modelContainer = document.getElementById('model-container');
     const hitTestAnchor = document.getElementById('hit-test-anchor');
     const trackingMesh = document.getElementById('tracking-mesh');
     
+    // Create Three.js scene
+    const scene = new THREE.Scene();
+
+    // Three.js renderer (auto-updates inside A-Frame's rendering pipeline)
+    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    document.body.appendChild(renderer.domElement);
+
     // GLTFLoader to load 3D models
     const loader = new GLTFLoader();
 
@@ -59,13 +71,15 @@
         // Remove the current model if it exists
         if (currentModel) {
             modelContainer.object3D.remove(currentModel);
+            scene.remove(currentModel);
         }
 
         // Load the new model
         loader.load(path, (gltf) => {
             currentModel = gltf.scene;
-            currentModel.scale.set(0.5, 0.5, 0.5);  // Scale the model
-            modelContainer.object3D.add(currentModel);
+            currentModel.scale.set(0.5, 0.5, 0.5);  // Adjust the scale as necessary
+            scene.add(currentModel); // Add the model to the Three.js scene
+            modelContainer.object3D.add(currentModel); // Add to A-Frame's scene
         });
     }
 
@@ -99,6 +113,14 @@
         // Enable the model
         modelContainer.setAttribute('visible', true);
     });
+
+    // Animate and render the Three.js scene
+    function animate() {
+        requestAnimationFrame(animate);
+        renderer.render(scene, new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000));
+    }
+
+    animate();  // Start animation loop
 </script>
 
 </body>
