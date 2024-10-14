@@ -7,9 +7,21 @@
     <style>
         body { margin: 0; }
         canvas { display: block; }
+        #start-button {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            padding: 10px 20px;
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
     </style>
 </head>
 <body>
+    <button id="start-button">Start AR</button>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/examples/js/loaders/GLTFLoader.js"></script>
     
@@ -17,7 +29,12 @@
         let scene, camera, renderer, controller;
         let model;
 
+        document.getElementById('start-button').addEventListener('click', init);
+
         async function init() {
+            // Hide the start button
+            document.getElementById('start-button').style.display = 'none';
+
             scene = new THREE.Scene();
             camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
             renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
@@ -26,7 +43,6 @@
 
             // Set up XR
             if (navigator.xr) {
-                document.body.appendChild(renderer.domElement);
                 const session = await navigator.xr.requestSession('immersive-ar', { requiredFeatures: ['hit-test'] });
                 renderer.xr.enabled = true;
                 renderer.xr.setSession(session);
@@ -65,7 +81,7 @@
 
         function loadGLBModel() {
             const loader = new THREE.GLTFLoader();
-            loader.load('90d4862ea1a84b45b63b8a860da94956.glb', (gltf) => {
+            loader.load('path/to/your/model.glb', (gltf) => {
                 model = gltf.scene;
                 model.scale.set(0.5, 0.5, 0.5); // Scale the model if necessary
                 scene.add(model);
@@ -77,8 +93,6 @@
             camera.updateProjectionMatrix();
             renderer.setSize(window.innerWidth, window.innerHeight);
         });
-
-        init();
     </script>
 </body>
 </html>
