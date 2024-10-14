@@ -23,6 +23,15 @@
     <a-anchor hit-testing-enabled="true" id="hit-test-anchor">
         <a-entity id="model-container"></a-entity>
     </a-anchor>
+    
+    <!-- White surface tracking mesh (representing detected surface) -->
+    <a-entity id="tracking-mesh" geometry="primitive: plane; width: 1; height: 1;" 
+              material="color: white; opacity: 0.5;" 
+              position="0 0 0" 
+              rotation="-90 0 0" 
+              visible="false">
+    </a-entity>
+
     <a-camera gps-camera rotation-reader fov="45"></a-camera> <!-- Fixed FOV -->
 </a-scene>
 
@@ -39,6 +48,7 @@
     let currentModel = null;
     const modelContainer = document.getElementById('model-container');
     const hitTestAnchor = document.getElementById('hit-test-anchor');
+    const trackingMesh = document.getElementById('tracking-mesh');
     
     // GLTFLoader to load 3D models
     const loader = new GLTFLoader();
@@ -71,7 +81,7 @@
         loadModel('90d4862ea1a84b45b63b8a860da94956.glb'); // Replace with actual path to Model 3
     });
 
-    // Function to place the model at the detected hit-test surface
+    // Function to place the model at the detected hit-test surface and show the mesh
     hitTestAnchor.addEventListener('hit-test-select', (e) => {
         const position = e.detail.intersection.point;
         const rotation = e.detail.intersection.face.normal;
@@ -79,6 +89,14 @@
         // Place the model at the hit-test location
         hitTestAnchor.setAttribute('position', position);
         hitTestAnchor.setAttribute('rotation', rotation);
+
+        // Make the surface tracking mesh visible at the hit-test location
+        trackingMesh.setAttribute('visible', true);
+        trackingMesh.object3D.position.copy(position);
+        trackingMesh.object3D.rotation.copy(rotation);
+
+        // Enable the model
+        modelContainer.setAttribute('visible', true);
     });
 </script>
 
