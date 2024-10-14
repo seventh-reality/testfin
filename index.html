@@ -3,90 +3,84 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AR.js + Three.js Surface Tracking</title>
+    <title>Three.js with AR.js - Surface Tracking</title>
+
+    <!-- A-Frame and AR.js -->
     <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
-    <script src="https://cdn.rawgit.com/jeromeetienne/ar.js/2.0.3/aframe/build/aframe-ar.js"></script>
-    <script src="https://threejs.org/build/three.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/three@0.139.2/examples/js/loaders/GLTFLoader.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/AR-js-org/AR.js/aframe/build/aframe-ar.js"></script>
+
     <style>
-        body, html {
-            margin: 0;
-            overflow: hidden;
-            font-family: sans-serif;
-        }
+        body { margin: 0; overflow: hidden; }
+        #ui { position: absolute; top: 20px; left: 20px; z-index: 10; }
+        button { margin: 5px; padding: 10px; }
     </style>
 </head>
 <body>
-    <!-- AR.js Scene -->
-    <a-scene embedded arjs="sourceType: webcam; debugUIEnabled: false;" vr-mode-ui="enabled: false">
-        <!-- Surface Hit Testing Visual -->
-        <a-entity id="surface-plane" geometry="primitive: plane; width: 1; height: 1;" 
-                  material="color: lightblue; opacity: 0.5;" 
-                  position="0 0 0" rotation="-90 0 0" 
-                  visible="false"></a-entity>
 
-        <!-- 3D Model (GLB) to be placed on detected surface -->
-        <a-entity id="glb-model" gltf-model="url(/tree.glb)" 
-                  scale="0.2 0.2 0.2" 
-                  position="0 0 0" 
-                  visible="false">
-        </a-entity>
+<!-- AR.js Scene with Surface Tracking -->
+<a-scene embedded arjs="sourceType: webcam; trackingMethod: best;">
+    <!-- Hit-test target for surface detection -->
+    <a-anchor hit-testing-enabled="true" id="hit-test-anchor">
+        <a-entity id="model-container"></a-entity>
+    </a-anchor>
+    <a-camera gps-camera rotation-reader fov="60"></a-camera> <!-- Fixed FOV -->
+</a-scene>
 
-        <!-- AR.js Camera with fixed FOV -->
-       <a-camera gps-camera rotation-reader fov="60"></a-camera> <!-- Fixed FOV -->
-    </a-scene>
+<!-- UI Buttons to Switch Models -->
+<div id="ui">
+    <button id="button1">Load Model 1</button>
+    <button id="button2">Load Model 2</button>
+    <button id="button3">Load Model 3</button>
+</div>
 
-    <script>
-        // Initialize GLTF loader for the .glb model
-        const scene = document.querySelector('a-scene');
-        const glbModel = document.getElementById('glb-model');
-        const surfacePlane = document.getElementById('surface-plane');
-        let hitTestSource = null;
-        let localSpace = null;
-        let isHitTestSupported = false;
+<script type="module">
+    import { GLTFLoader } from 'https://cdn.skypack.dev/three@0.136.0/examples/jsm/loaders/GLTFLoader.js';
 
-        scene.addEventListener('loaded', function () {
-            // Initialize AR hit test for surface detection
-            const session = scene.renderer.xr.getSession();
+    let currentModel = null;
+    const modelContainer = document.getElementById('model-container');
+    const hitTestAnchor = document.getElementById('hit-test-anchor');
+    
+    // GLTFLoader to load 3D models
+    const loader = new GLTFLoader();
 
-            session.requestReferenceSpace('viewer').then((space) => {
-                localSpace = space;
-                session.requestHitTestSource({ space: localSpace }).then((source) => {
-                    hitTestSource = source;
-                });
-            });
+    // Function to load a GLB model and display it in the AR scene
+    function loadModel(path) {
+        // Remove the current model if it exists
+        if (currentModel) {
+            modelContainer.object3D.remove(currentModel);
+        }
 
-            session.addEventListener('end', () => {
-                hitTestSource = null;
-                localSpace = null;
-                isHitTestSupported = false;
-            });
-
-            isHitTestSupported = true;
+        // Load the new model
+        loader.load(path, (gltf) => {
+            currentModel = gltf.scene;
+            currentModel.scale.set(0.5, 0.5, 0.5);  // Scale the model
+            modelContainer.object3D.add(currentModel);
         });
+    }
 
-        scene.addEventListener('tick', () => {
-            if (hitTestSource && isHitTestSupported) {
-                const frame = scene.renderer.xr.getFrame();
+    // Set event listeners for buttons
+    document.getElementById('button1').addEventListener('click', () => {
+        loadModel('90d4862ea1a84b45b63b8a860da94956.glb'); // Replace with actual path to Model 1
+    });
 
-                // Perform the hit test
-                const hitTestResults = frame.getHitTestResults(hitTestSource);
-                if (hitTestResults.length > 0) {
-                    const hit = hitTestResults[0];
-                    const hitPose = hit.getPose(localSpace);
+    document.getElementById('button2').addEventListener('click', () => {
+        loadModel('c9c572b946de4f6b9f0fcc7043c23ea0.glb'); // Replace with actual path to Model 2
+    });
 
-                    // Set the surface plane's position based on hit test result
-                    surfacePlane.setAttribute('visible', true);
-                    surfacePlane.object3D.position.copy(hitPose.transform.position);
-                    surfacePlane.object3D.quaternion.copy(hitPose.transform.orientation);
+    document.getElementById('button3').addEventListener('click', () => {
+        loadModel('90d4862ea1a84b45b63b8a860da94956.glb'); // Replace with actual path to Model 3
+    });
 
-                    // Show the model and position it
-                    glbModel.setAttribute('visible', true);
-                    glbModel.object3D.position.copy(hitPose.transform.position);
-                    glbModel.object3D.quaternion.copy(hitPose.transform.orientation);
-                }
-            }
-        });
-    </script>
+    // Function to place the model at the detected hit-test surface
+    hitTestAnchor.addEventListener('hit-test-select', (e) => {
+        const position = e.detail.intersection.point;
+        const rotation = e.detail.intersection.face.normal;
+
+        // Place the model at the hit-test location
+        hitTestAnchor.setAttribute('position', position);
+        hitTestAnchor.setAttribute('rotation', rotation);
+    });
+</script>
+
 </body>
 </html>
