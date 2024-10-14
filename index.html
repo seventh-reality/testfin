@@ -3,125 +3,82 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Three.js with AR.js - Surface Tracking</title>
-
-    <!-- A-Frame and AR.js -->
-    <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/gh/AR-js-org/AR.js/aframe/build/aframe-ar.js"></script>
-
-    <!-- Three.js -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r136/three.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/three@0.136.0/examples/js/loaders/GLTFLoader.js"></script>
-
+    <title>WebAR with GLB Model</title>
     <style>
-        body { margin: 0; overflow: hidden; }
-        #ui { position: absolute; top: 20px; left: 20px; z-index: 10; }
-        button { margin: 5px; padding: 10px; }
+        body { margin: 0; }
+        canvas { display: block; }
     </style>
 </head>
 <body>
-
-<!-- AR.js Scene with Surface Tracking -->
-<a-scene embedded arjs="sourceType: webcam; trackingMethod: best;">
-    <!-- Hit-test target for surface detection -->
-    <a-anchor hit-testing-enabled="true" id="hit-test-anchor">
-        <a-entity id="model-container" visible="false"></a-entity>
-    </a-anchor>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/examples/js/loaders/GLTFLoader.js"></script>
     
-    <!-- White surface tracking mesh (representing detected surface) -->
-    <a-entity id="tracking-mesh" geometry="primitive: plane; width: 1; height: 1;" 
-              material="color: white; opacity: 0.5;" 
-              position="0 0 0" 
-              rotation="-90 0 0" 
-              visible="false">
-    </a-entity>
+    <script>
+        let scene, camera, renderer, controller;
+        let model;
 
-    <!-- Camera with fixed FOV -->
-    <a-camera gps-camera rotation-reader fov="10"></a-camera>
-</a-scene>
+        async function init() {
+            scene = new THREE.Scene();
+            camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            document.body.appendChild(renderer.domElement);
 
-<!-- UI Buttons to Switch Models -->
-<div id="ui">
-    <button id="button1">Load Model 1</button>
-    <button id="button2">Load Model 2</button>
-    <button id="button3">Load Model 3</button>
-</div>
+            // Set up XR
+            if (navigator.xr) {
+                document.body.appendChild(renderer.domElement);
+                const session = await navigator.xr.requestSession('immersive-ar', { requiredFeatures: ['hit-test'] });
+                renderer.xr.enabled = true;
+                renderer.xr.setSession(session);
 
-<script type="module">
-    import { GLTFLoader } from 'https://cdn.jsdelivr.net/npm/three/examples/jsm/loaders/GLTFLoader.js';
+                // Add hit test source
+                const hitTestSource = await session.requestHitTestSource({ space: renderer.xr.getReferenceSpace() });
+                
+                session.addEventListener('end', () => {
+                    if (model) scene.remove(model);
+                });
 
-    let currentModel = null;
-    const modelContainer = document.getElementById('model-container');
-    const hitTestAnchor = document.getElementById('hit-test-anchor');
-    const trackingMesh = document.getElementById('tracking-mesh');
-    
-    // Create Three.js scene
-    const scene = new THREE.Scene();
+                controller = renderer.xr.getController(0);
+                scene.add(controller);
 
-    // Three.js renderer (auto-updates inside A-Frame's rendering pipeline)
-    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    document.body.appendChild(renderer.domElement);
-
-    // GLTFLoader to load 3D models
-    const loader = new GLTFLoader();
-
-    // Function to load a GLB model and display it in the AR scene
-    function loadModel(path) {
-        // Remove the current model if it exists
-        if (currentModel) {
-            modelContainer.object3D.remove(currentModel);
-            scene.remove(currentModel);
+                session.requestAnimationFrame(onXRFrame);
+            }
         }
 
-        // Load the new model
-        loader.load(path, (gltf) => {
-            currentModel = gltf.scene;
-            currentModel.scale.set(0.5, 0.5, 0.5);  // Adjust the scale as necessary
-            scene.add(currentModel); // Add the model to the Three.js scene
-            modelContainer.object3D.add(currentModel); // Add to A-Frame's scene
+        function onXRFrame(time, frame) {
+            const session = frame.session;
+            const referenceSpace = session.referenceSpace;
+
+            // Hit test
+            const hitTestResults = frame.getHitTestResults(hitTestSource);
+            if (hitTestResults.length > 0) {
+                const hit = hitTestResults[0];
+                if (!model) {
+                    loadGLBModel();
+                }
+                model.position.copy(hit.getPose(referenceSpace).transform.position);
+                model.quaternion.copy(hit.getPose(referenceSpace).transform.orientation);
+            }
+
+            renderer.render(scene, camera);
+        }
+
+        function loadGLBModel() {
+            const loader = new THREE.GLTFLoader();
+            loader.load('path/to/your/model.glb', (gltf) => {
+                model = gltf.scene;
+                model.scale.set(0.5, 0.5, 0.5); // Scale the model if necessary
+                scene.add(model);
+            });
+        }
+
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
         });
-    }
 
-    // Set event listeners for buttons to load different models
-    document.getElementById('button1').addEventListener('click', () => {
-        loadModel('90d4862ea1a84b45b63b8a860da94956.glb'); // Replace with actual path to Model 1
-    });
-
-    document.getElementById('button2').addEventListener('click', () => {
-        loadModel('c9c572b946de4f6b9f0fcc7043c23ea0.glb'); // Replace with actual path to Model 2
-    });
-
-    document.getElementById('button3').addEventListener('click', () => {
-        loadModel('90d4862ea1a84b45b63b8a860da94956.glb'); // Replace with actual path to Model 3
-    });
-
-    // Function to place the model at the detected hit-test surface and show the mesh
-    hitTestAnchor.addEventListener('hit-test-select', (e) => {
-        const position = e.detail.intersection.point;
-        const rotation = e.detail.intersection.face.normal;
-
-        // Place the model at the hit-test location
-        hitTestAnchor.setAttribute('position', position);
-        hitTestAnchor.setAttribute('rotation', rotation);
-
-        // Make the surface tracking mesh visible at the hit-test location
-        trackingMesh.setAttribute('visible', true);
-        trackingMesh.object3D.position.copy(position);
-        trackingMesh.object3D.rotation.copy(rotation);
-
-        // Enable the model
-        modelContainer.setAttribute('visible', true);
-    });
-
-    // Animate and render the Three.js scene
-    function animate() {
-        requestAnimationFrame(animate);
-        renderer.render(scene, new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000));
-    }
-
-    animate();  // Start animation loop
-</script>
-
+        init();
+    </script>
 </body>
 </html>
