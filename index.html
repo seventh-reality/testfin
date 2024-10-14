@@ -21,7 +21,7 @@
 <a-scene embedded arjs="sourceType: webcam; trackingMethod: best;">
     <!-- Hit-test target for surface detection -->
     <a-anchor hit-testing-enabled="true" id="hit-test-anchor">
-        <a-entity id="model-container"></a-entity>
+        <a-entity id="model-container" visible="false"></a-entity>
     </a-anchor>
     
     <!-- White surface tracking mesh (representing detected surface) -->
@@ -32,7 +32,8 @@
               visible="false">
     </a-entity>
 
-    <a-camera gps-camera rotation-reader fov="60"></a-camera> <!-- Fixed FOV -->
+    <!-- Camera with fixed FOV -->
+    <a-camera gps-camera rotation-reader fov="60"></a-camera>
 </a-scene>
 
 <!-- UI Buttons to Switch Models -->
@@ -68,17 +69,17 @@
         });
     }
 
-    // Set event listeners for buttons
+    // Set event listeners for buttons to load different models
     document.getElementById('button1').addEventListener('click', () => {
-        loadModel('90d4862ea1a84b45b63b8a860da94956.glb'); // Replace with actual path to Model 1
+        loadModel('path-to-model1.glb'); // Replace with actual path to Model 1
     });
 
     document.getElementById('button2').addEventListener('click', () => {
-        loadModel('c9c572b946de4f6b9f0fcc7043c23ea0.glb'); // Replace with actual path to Model 2
+        loadModel('path-to-model2.glb'); // Replace with actual path to Model 2
     });
 
     document.getElementById('button3').addEventListener('click', () => {
-        loadModel('90d4862ea1a84b45b63b8a860da94956.glb'); // Replace with actual path to Model 3
+        loadModel('path-to-model3.glb'); // Replace with actual path to Model 3
     });
 
     // Function to place the model at the detected hit-test surface and show the mesh
