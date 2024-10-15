@@ -17,6 +17,7 @@
             border: none;
             border-radius: 5px;
             cursor: pointer;
+            z-index: 1;
         }
     </style>
 </head>
@@ -24,7 +25,7 @@
     <button id="start-button">Start AR</button>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/examples/js/loaders/GLTFLoader.js"></script>
-    
+
     <script>
         let scene, camera, renderer, controller;
         let model, hitTestSource;
@@ -32,13 +33,11 @@
         document.getElementById('start-button').addEventListener('click', init);
 
         async function init() {
-            // Check for WebXR support
             if (!navigator.xr) {
                 alert('WebXR not supported');
                 return;
             }
 
-            // Hide the start button
             document.getElementById('start-button').style.display = 'none';
 
             scene = new THREE.Scene();
@@ -47,12 +46,13 @@
             renderer.setSize(window.innerWidth, window.innerHeight);
             document.body.appendChild(renderer.domElement);
 
-            // Set up XR session
+            // Request XR session
             try {
                 const session = await navigator.xr.requestSession('immersive-ar');
                 renderer.xr.enabled = true;
                 renderer.xr.setSession(session);
 
+                // Create a reference space
                 const referenceSpace = await session.requestReferenceSpace('local');
                 hitTestSource = await session.requestHitTestSource({ space: referenceSpace });
 
@@ -71,7 +71,6 @@
 
         function onXRFrame(time, frame) {
             const session = frame.session;
-            const referenceSpace = session.referenceSpace;
 
             // Hit test
             const hitTestResults = frame.getHitTestResults(hitTestSource);
@@ -80,8 +79,8 @@
                 if (!model) {
                     loadGLBModel();
                 } else {
-                    model.position.copy(hit.getPose(referenceSpace).transform.position);
-                    model.quaternion.copy(hit.getPose(referenceSpace).transform.orientation);
+                    model.position.copy(hit.getPose(session.referenceSpace).transform.position);
+                    model.quaternion.copy(hit.getPose(session.referenceSpace).transform.orientation);
                 }
             }
 
@@ -92,9 +91,9 @@
             const loader = new THREE.GLTFLoader();
             loader.load('tree.glb', (gltf) => {
                 model = gltf.scene;
-                model.scale.set(0.5, 0.5, 0.5); // Scale the model if necessary
+                model.scale.set(0.5, 0.5, 0.5);
                 scene.add(model);
-            }, undefined, function (error) {
+            }, undefined, (error) => {
                 console.error('An error occurred while loading the model', error);
             });
         }
