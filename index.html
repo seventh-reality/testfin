@@ -49,11 +49,10 @@
 
             // Set up XR session
             try {
-                const session = await navigator.xr.requestSession('immersive-ar', { requiredFeatures: ['hit-test'] });
+                const session = await navigator.xr.requestSession('immersive-ar');
                 renderer.xr.enabled = true;
                 renderer.xr.setSession(session);
 
-                // Add hit test source
                 const referenceSpace = await session.requestReferenceSpace('local');
                 hitTestSource = await session.requestHitTestSource({ space: referenceSpace });
 
