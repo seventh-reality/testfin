@@ -13,6 +13,33 @@
   <script src="https://unpkg.com/intersection-observer@0.5.1/intersection-observer.js"></script>
   <script src="https://unpkg.com/resize-observer-polyfill@1.5.1/dist/ResizeObserver.js"></script>
 
+  <style>
+    body {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      background-color: #f0f0f0;
+      padding: 20px;
+    }
+    model-viewer {
+      width: 100%;
+      max-width: 600px;
+      height: 400px;
+    }
+    button {
+      margin: 10px;
+      padding: 10px 20px;
+      font-size: 16px;
+      cursor: pointer;
+      border: none;
+      background-color: #007BFF;
+      color: white;
+      border-radius: 5px;
+    }
+    button:hover {
+      background-color: #0056b3;
+    }
+  </style>
 </head>
 <body>
   <model-viewer 
@@ -27,14 +54,29 @@
   </model-viewer>
   
   <button type="button" onclick="launchAR()">View in AR</button>
+  <button type="button" onclick="exitAR()">Exit AR</button>
+  <button type="button" onclick="resetModel()">Reset Model</button>
   
   <script>
+    const modelViewer = document.querySelector('model-viewer');
+
     function launchAR() {
-      const modelViewer = document.querySelector('model-viewer');
       if (modelViewer && modelViewer.hasAttribute('ar')) {
         modelViewer.enterAR();
       } else {
         alert('AR not supported on this device.');
+      }
+    }
+
+    function exitAR() {
+      if (modelViewer && modelViewer.hasAttribute('ar')) {
+        modelViewer.exitAR();
+      }
+    }
+
+    function resetModel() {
+      if (modelViewer) {
+        modelViewer.reset();
       }
     }
   </script>
