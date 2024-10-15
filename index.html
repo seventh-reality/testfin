@@ -47,22 +47,27 @@
             renderer.setSize(window.innerWidth, window.innerHeight);
             document.body.appendChild(renderer.domElement);
 
-            // Set up XR
-            const session = await navigator.xr.requestSession('immersive-ar', { requiredFeatures: ['hit-test'] });
-            renderer.xr.enabled = true;
-            renderer.xr.setSession(session);
+            // Set up XR session
+            try {
+                const session = await navigator.xr.requestSession('immersive-ar', { requiredFeatures: ['hit-test'] });
+                renderer.xr.enabled = true;
+                renderer.xr.setSession(session);
 
-            // Add hit test source
-            hitTestSource = await session.requestHitTestSource({ space: renderer.xr.getReferenceSpace() });
+                // Add hit test source
+                const referenceSpace = await session.requestReferenceSpace('local');
+                hitTestSource = await session.requestHitTestSource({ space: referenceSpace });
 
-            session.addEventListener('end', () => {
-                if (model) scene.remove(model);
-            });
+                session.addEventListener('end', () => {
+                    if (model) scene.remove(model);
+                });
 
-            controller = renderer.xr.getController(0);
-            scene.add(controller);
+                controller = renderer.xr.getController(0);
+                scene.add(controller);
 
-            session.requestAnimationFrame(onXRFrame);
+                session.requestAnimationFrame(onXRFrame);
+            } catch (error) {
+                console.error('Failed to start AR session:', error);
+            }
         }
 
         function onXRFrame(time, frame) {
