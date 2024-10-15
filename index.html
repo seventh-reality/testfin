@@ -1,101 +1,73 @@
-<!--
-    index.html 
-
-    This file make for learning work with th USDZ inside of the 
-    Safari web browser.
-
-    The most important references available inside of the 
-    https://webkit.org/blog/
--->
 <!DOCTYPE html>
-<html>
+<html lang="en">
+  <head>
+    <title> Danfoss </title>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
 
-<head>
-    <style>
-        .container {
-            display: flex;
-            flex-direction: column;
-        }
-        
-        a {
-            text-decoration: none;
-            color: black;
-            font-size: medium;
-            margin-top: 20px;
-            margin-left: 10px;
-        }
-    </style>
-</head>
+    <link rel="stylesheet" href="demo-styles.css">
+    
+    <!-- The following libraries and polyfills are recommended to maximize browser support -->
+    <!-- NOTE: you must adjust the paths as appropriate for your project -->
+    
+    <!-- ?? REQUIRED: Web Components polyfill to support Edge and Firefox < 63 -->
+    <script src="js/webcomponents-loader.js"></script>
 
+    <!-- ?? OPTIONAL: Intersection Observer polyfill for better performance in Safari and IE11 -->
+    <script src="js/intersection-observer.js"></script>
+
+    <!-- ?? OPTIONAL: Resize Observer polyfill improves resize behavior in non-Chrome browsers -->
+    <script src="js/ResizeObserver.js"></script>
+    
+    <!-- ?? OPTIONAL: The :focus-visible polyfill removes the focus ring for some input types -->
+    <script src="js/focus-visible.js" defer></script>
+
+  </head> 
 <body>
-    <div class="container">
-        <h1>
-            Oh nice. Welcome back to Alireza.codes (Soltani) GH Page about Web AR
-        </h1>
-        <h2>Only in iOS</h2>
+  <div id="card">
+    <!-- All you need to put beautiful, interactive 3D content on your site: -->
+    <model-viewer src="Model/115n0359_asm.glb"
+                  ios-src="Model/115n0359_asm.usdz"
+                  alt=""
+                  shadow-intensity="0"
+				  id="viewer-singleton"
+                  camera-controls
+				  camera-orbit="220deg 70deg 20m"
+				  safari chrome
+                   ar
+				   ar-scale=""
+				   exposure="1"
+				  poster="Images/Poster.png">
+    </model-viewer>
+    <section class="attribution">
+      <h1> 115n0359_asm </h1>
+        </div>
+        <!-- ?? Include both scripts below to support all browsers! -->
 
-        <a rel="ar" href="assets/usds/heart.usdz">
-            <span>Tap to getting my heart!!!</span>
-        </a>
+  <!-- Loads <model-viewer> for modern browsers: -->
+  <script type="module"
+      src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js">
+  </script>
 
-        <a rel="ar" href="assets/usds/chair_swan.usdz">
-            <span>Show Chair Swan</span>
-        </a>
-
-        <a rel="ar" href="assets/usds/flower_tulip.usdz">
-            <span>Show Flower tulip</span>
-        </a>
-
-        <a rel="ar" href="assets/usds/teapot.usdz">
-            <span>Show Teapot</span>
-        </a>
-
-        <h2>Only in Android</h2>
-        <a href="intent://arvr.google.com/scene-viewer/1.0?file=https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/Avocado/glTF/Avocado.gltf&mode=ar_only#Intent;scheme=https;package=com.google.ar.core;action=android.intent.action.VIEW;S.browser_fallback_url=https://developers.google.com/ar;end;">Avocado</a
-      >
-
-      <model-viewer
-        ar
-        ar-modes="scene-viewer webxr quick-look"
-        alt="A 3D model of an astronaut."
-        src="/assets/glTF/Duck.gltf"
-        >Click me to show the Duck</model-viewer
-      >
-    </div>
-    <script>
-      // Create Anchor link
-      const a = document.createElement("ar");
-
-      // Checking availability of AR inside of every HTML web page!
-      // Using `rel="ar"` to checking support of a section from the
-      // Web AR.
-      if (a.relList.support("ar")) {
-        window.alert("AR is available in this simple HTML");
-      }
-
-      // Android section
-      // Check whether this is an Android device that requested this view
-      const isAndroid = /android/i.test(navigator.userAgent);
-      // Fallback URL is used if the Google app is not installed and up to date.
-      // It's like some limit of Google Play Services on Huawei devices.
-      const fallbackUrl =
-        "https://arvr.google.com/scene-viewer?file=https%3A%2F%2Fstorage.googleapis.com%2Far-answers-in-search-models%2Fstatic%2FTiger%2Fmodel.glb&link=https%3A%2F%2Fgoogle.com&title=Tiger";
-
-      // This intent URL trigger Scene Viewer on Android and falls back to
-      // fallbackURL if the Google app is not installed and up to date.
-      const sceneViewerUrl =
-        "intent://arvr.google.com/scene-viewer/1.0?file=https://storage.googleapis.com/ar-answers-in-search-models/static/Tiger/model.glb&title=Tiger#Intent;scheme=https;package=com.google.android.googlequicksearchbox;action=android.intent.action.VIEW;S.browser_fallback_url=" +
-        fallbackUrl +
-        ";end;";
-
-      // Create a link.
-      var aAndroid = document.createElement("a");
-      aAndroid.appendChild(document.createTextNode("Tiger"));
-      // Set the href to the intent URL on Android and the fallback URL
-      // everywhere else.
-      aAndroid.href = isAndroid ? sceneViewerUrl : fallbackUrl;
-      // Add the link to the page.
-      document.body.appendChild(aAndroid);
+  <!-- Loads <model-viewer> for old browsers like IE11: -->
+  <script nomodule
+      src="https://unpkg.com/@google/model-viewer/dist/model-viewer-legacy.js">
+  </script>
+  
+  <script>
+        (() => {
+          var checkExist = setInterval(function() {
+           if (document.querySelector("#viewer-singleton") != null) {
+              modelViewer = document.querySelector("#viewer-singleton");
+              modelViewer.activateAR();
+              clearInterval(checkExist);
+           }
+        }, 100);
+        })();
     </script>
-  </body>
+  
+  
+
+</body>
 </html>
