@@ -3,84 +3,50 @@
 <head>
   <title>&lt;model-viewer&gt; Augmented Reality</title>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+  <meta name="viewport" content="width=device-width, user-scalable=no,
+  minimum-scale=1.0, maximum-scale=1.0">
   <link rel="stylesheet" href="styles.css">
 
-  <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.js"></script>
-  <script nomodule src="https://unpkg.com/@google/model-viewer/dist/model-viewer-legacy.js"></script>
+  <!-- 💁 Include both scripts below to support all browsers! -->
+
+  <!-- Loads <model-viewer> for modern browsers: -->
+  <script type="module"
+      src="https://unpkg.com/@google/model-viewer/dist/model-viewer.js">
+  </script>
+
+  <!-- Loads <model-viewer> for old browsers like IE11: -->
+  <script nomodule
+      src="https://unpkg.com/@google/model-viewer/dist/model-viewer-legacy.js">
+  </script>
+
+  <!-- The following libraries and polyfills are recommended to maximize browser support -->
+  <!-- NOTE: you must adjust the paths as appropriate for your project -->
+      
+  <!-- 🚨 REQUIRED: Web Components polyfill to support Edge and Firefox < 63 -->
   <script src="https://unpkg.com/@webcomponents/webcomponentsjs@2.1.3/webcomponents-loader.js"></script>
+
+  <!-- 💁 OPTIONAL: Intersection Observer polyfill for better performance in Safari and IE11 -->
   <script src="https://unpkg.com/intersection-observer@0.5.1/intersection-observer.js"></script>
+
+  <!-- 💁 OPTIONAL: Resize Observer polyfill improves resize behavior in non-Chrome browsers -->
   <script src="https://unpkg.com/resize-observer-polyfill@1.5.1/dist/ResizeObserver.js"></script>
+
+  <!-- 💁 OPTIONAL: Fullscreen polyfill is required for experimental AR features in Canary -->
+  <!--<script src="https://unpkg.com/fullscreen-polyfill@1.0.2/dist/fullscreen.polyfill.js"></script>-->
+
+  <!-- 💁 OPTIONAL: Include prismatic.js for Magic Leap support -->
+  <!--<script src="https://unpkg.com/@magicleap/prismatic@0.18.2/prismatic.min.js"></script>-->
+
 </head>
 <body>
-  <model-viewer id="model" src="assets/RocketShip_1393.gltf" 
+  <model-viewer src="assets/RocketShip_1393.gltf" 
                 ios-src="assets/RocketShip_1393.usdz"
                 ar
                 auto-rotate 
                 camera-controls 
                 shadow-intensity="1" 
                 alt="A 3D model of a rocket" background-color="#70BCD1">
-    <div class="controls">
-    <button id="enter-ar">Enter AR</button>
-    <button id="rotate">Rotate Model</button>
-    <button id="reset-view">Reset View</button>
-    </div>
+                  
   </model-viewer>
-
-  
-
-  <script>
-    const modelViewer = document.getElementById('model');
-    const controls = document.querySelector('.controls');
-
-    document.getElementById('enter-ar').addEventListener('click', () => {
-      modelViewer.enterAR();
-    });
-
-    document.getElementById('rotate').addEventListener('click', () => {
-      modelViewer.autoRotate = !modelViewer.autoRotate;
-    });
-
-    document.getElementById('reset-view').addEventListener('click', () => {
-      modelViewer.reset();
-    });
-
-    // Keep controls visible in AR mode
-    modelViewer.addEventListener('ar-status', (event) => {
-      if (event.detail.status === 'found') {
-        controls.style.display = 'block';
-      } else {
-        controls.style.display = 'none';
-      }
-    });
-
-    // Show controls by default
-    controls.style.display = 'block';
-  </script>
-
-  <style>
-    .controls {
-      position: absolute;
-      top: 10px;
-      left: 10px;
-      z-index: 10;
-      background: rgba(255, 255, 255, 0.8);
-      padding: 10px;
-      border-radius: 5px;
-      box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
-    }
-    .controls button {
-      margin: 5px;
-      padding: 10px;
-      border: none;
-      border-radius: 5px;
-      background-color: #70BCD1;
-      color: white;
-      cursor: pointer;
-    }
-    .controls button:hover {
-      background-color: #5FA1B7;
-    }
-  </style>
 </body>
 </html>
