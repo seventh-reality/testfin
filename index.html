@@ -13,16 +13,6 @@
   <script src="https://unpkg.com/intersection-observer@0.5.1/intersection-observer.js"></script>
   <script src="https://unpkg.com/resize-observer-polyfill@1.5.1/dist/ResizeObserver.js"></script>
 
-  <style>
-    /* Hide button in AR mode */
-    model-viewer[ar] {
-      pointer-events: none;
-    }
-    model-viewer[ar] + button {
-      display: none; /* Hide button when AR is active */
-    }
-  </style>
-
 </head>
 <body>
   <model-viewer src="assets/RocketShip_1393.gltf" 
@@ -32,21 +22,8 @@
                 camera-controls 
                 shadow-intensity="1" 
                 alt="A 3D model of a rocket" 
-                background-color="#70BCD1"
-                onarstatuschanged="handleARStatusChange(event)">
+                background-color="#70BCD1">
+    <button type="button" onclick="alert('Hello world!')">Click Me!</button>
   </model-viewer>
-  <button type="button" onclick="alert('Hello world!')">Click Me!</button>
-
-  <script>
-    function handleARStatusChange(event) {
-      if (event.detail.status === 'started') {
-        // Optionally handle when AR starts
-        console.log('AR started');
-      } else if (event.detail.status === 'stopped') {
-        // Optionally handle when AR stops
-        console.log('AR stopped');
-      }
-    }
-  </script>
 </body>
 </html>
