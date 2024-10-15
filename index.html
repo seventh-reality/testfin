@@ -15,15 +15,28 @@
 
 </head>
 <body>
-  <model-viewer src="assets/RocketShip_1393.gltf" 
-                ios-src="assets/RocketShip_1393.usdz"
-                ar
-                auto-rotate 
-                camera-controls 
-                shadow-intensity="1" 
-                alt="A 3D model of a rocket" 
-                background-color="#70BCD1">
-    <button type="button" onclick="alert('Hello world!')">Click Me!</button>
+  <model-viewer 
+    src="assets/RocketShip_1393.gltf" 
+    ios-src="assets/RocketShip_1393.usdz"
+    ar
+    auto-rotate 
+    camera-controls 
+    shadow-intensity="1" 
+    alt="A 3D model of a rocket" 
+    background-color="#70BCD1">
   </model-viewer>
+  
+  <button type="button" onclick="launchAR()">View in AR</button>
+  
+  <script>
+    function launchAR() {
+      const modelViewer = document.querySelector('model-viewer');
+      if (modelViewer && modelViewer.hasAttribute('ar')) {
+        modelViewer.enterAR();
+      } else {
+        alert('AR not supported on this device.');
+      }
+    }
+  </script>
 </body>
 </html>
