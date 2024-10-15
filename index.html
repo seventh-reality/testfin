@@ -19,7 +19,8 @@
                 auto-rotate 
                 camera-controls 
                 shadow-intensity="1" 
-                alt="A 3D model of a rocket" background-color="#70BCD1">
+                alt="A 3D model of a rocket" 
+                background-color="#70BCD1">
   </model-viewer>
 
   <div class="controls">
@@ -55,9 +56,27 @@
 
     // Show controls by default
     controls.style.display = 'block';
+
+    // Make sure controls stay visible in AR mode
+    modelViewer.addEventListener('ar-session-start', () => {
+      controls.style.display = 'block';
+    });
+
+    modelViewer.addEventListener('ar-session-end', () => {
+      controls.style.display = 'block'; // Keep controls visible after AR session ends
+    });
   </script>
 
   <style>
+    body {
+      margin: 0;
+      overflow: hidden;
+      background-color: #70BCD1; /* Background color matching the model-viewer */
+    }
+    model-viewer {
+      width: 100%;
+      height: 100%;
+    }
     .controls {
       position: absolute;
       top: 10px;
