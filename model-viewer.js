@@ -1,21 +1,5 @@
-/**
- * @license
- * Copyright 2017 Google LLC
- * SPDX-License-Identifier: BSD-3-Clause
- */
 const i$2=(i,e)=>"method"===e.kind&&e.descriptor&&!("value"in e.descriptor)?{...e,finisher(n){n.createProperty(e.key,i);}}:{kind:"field",key:Symbol(),placement:"own",descriptor:{},originalKey:e.key,initializer(){"function"==typeof e.initializer&&(this[e.key]=e.initializer.call(this));},finisher(n){n.createProperty(e.key,i);}},e$5=(i,e,n)=>{e.constructor.createProperty(n,i);};function n$8(n){return (t,o)=>void 0!==o?e$5(n,t,o):i$2(n,t)}
-
-/**
- * @license
- * Copyright 2021 Google LLC
- * SPDX-License-Identifier: BSD-3-Clause
- */var n$7;null!=(null===(n$7=window.HTMLSlotElement)||void 0===n$7?void 0:n$7.prototype.assignedElements)?(o,n)=>o.assignedElements(n):(o,n)=>o.assignedNodes(n).filter((o=>o.nodeType===Node.ELEMENT_NODE));
-
-/**
- * @license
- * Copyright 2010-2023 Three.js Authors
- * SPDX-License-Identifier: MIT
- */
+var n$7;null!=(null===(n$7=window.HTMLSlotElement)||void 0===n$7?void 0:n$7.prototype.assignedElements)?(o,n)=>o.assignedElements(n):(o,n)=>o.assignedNodes(n).filter((o=>o.nodeType===Node.ELEMENT_NODE));
 const REVISION = '163';
 const CullFaceNone = 0;
 const CullFaceBack = 1;
@@ -73,7 +57,6 @@ const AgXToneMapping = 6;
 const NeutralToneMapping = 7;
 const AttachedBindMode = 'attached';
 const DetachedBindMode = 'detached';
-
 const UVMapping = 300;
 const CubeReflectionMapping = 301;
 const CubeRefractionMapping = 302;
@@ -114,7 +97,6 @@ const RedIntegerFormat = 1029;
 const RGFormat = 1030;
 const RGIntegerFormat = 1031;
 const RGBAIntegerFormat = 1033;
-
 const RGB_S3TC_DXT1_Format = 33776;
 const RGBA_S3TC_DXT1_Format = 33777;
 const RGBA_S3TC_DXT3_Format = 33778;
@@ -165,22 +147,17 @@ const BasicDepthPacking = 3200;
 const RGBADepthPacking = 3201;
 const TangentSpaceNormalMap = 0;
 const ObjectSpaceNormalMap = 1;
-
-// Color space string identifiers, matching CSS Color Module Level 4 and WebGPU names where available.
 const NoColorSpace = '';
 const SRGBColorSpace = 'srgb';
 const LinearSRGBColorSpace = 'srgb-linear';
 const DisplayP3ColorSpace = 'display-p3';
 const LinearDisplayP3ColorSpace = 'display-p3-linear';
-
 const LinearTransfer = 'linear';
 const SRGBTransfer = 'srgb';
-
 const Rec709Primaries = 'rec709';
 const P3Primaries = 'p3';
 const KeepStencilOp = 7680;
 const AlwaysStencilFunc = 519;
-
 const NeverCompare = 512;
 const LessCompare = 513;
 const EqualCompare = 514;
@@ -189,17 +166,10 @@ const GreaterCompare = 516;
 const NotEqualCompare = 517;
 const GreaterEqualCompare = 518;
 const AlwaysCompare = 519;
-
 const StaticDrawUsage = 35044;
 const GLSL3 = '300 es';
-
 const WebGLCoordinateSystem = 2000;
 const WebGPUCoordinateSystem = 2001;
-
-/**
- * https://github.com/mrdoob/eventdispatcher.js/
- */
-
 class EventDispatcher {
 
 	addEventListener( type, listener ) {
@@ -455,13 +425,6 @@ function floorPowerOfTwo( value ) {
 }
 
 function setQuaternionFromProperEuler( q, a, b, c, order ) {
-
-	// Intrinsic Proper Euler Angles - see https://en.wikipedia.org/wiki/Euler_angles
-
-	// rotations are applied to the axes in the order specified by 'order'
-	// rotation by angle 'a' is applied first, then by angle 'b', then by angle 'c'
-	// angles are in radians
-
 	const cos = Math.cos;
 	const sin = Math.sin;
 
@@ -1520,19 +1483,6 @@ function warnOnce( message ) {
 	console.warn( message );
 
 }
-
-/**
- * Matrices converting P3 <-> Rec. 709 primaries, without gamut mapping
- * or clipping. Based on W3C specifications for sRGB and Display P3,
- * and ICC specifications for the D50 connection space. Values in/out
- * are _linear_ sRGB and _linear_ Display P3.
- *
- * Note that both sRGB and Display P3 use the sRGB transfer functions.
- *
- * Reference:
- * - http://www.russellcottrell.com/photo/matrixCalculator.htm
- */
-
 const LINEAR_SRGB_TO_LINEAR_DISPLAY_P3 = /*@__PURE__*/ new Matrix3().set(
 	0.8224621, 0.177538, 0.0,
 	0.0331941, 0.9668058, 0.0,
@@ -1544,11 +1494,6 @@ const LINEAR_DISPLAY_P3_TO_LINEAR_SRGB = /*@__PURE__*/ new Matrix3().set(
 	- 0.0420569, 1.0420571, 0.0,
 	- 0.0196376, - 0.0786361, 1.0982735
 );
-
-/**
- * Defines supported color spaces by transfer function and primaries,
- * and provides conversions to/from the Linear-sRGB reference space.
- */
 const COLOR_SPACES = {
 	[ LinearSRGBColorSpace ]: {
 		transfer: LinearTransfer,
@@ -2467,15 +2412,8 @@ class Vector4 {
 	}
 
 	setAxisAngleFromQuaternion( q ) {
-
-		// http://www.euclideanspace.com/maths/geometry/rotations/conversions/quaternionToAngle/index.htm
-
-		// q is assumed to be normalized
-
 		this.w = 2 * Math.acos( q.w );
-
 		const s = Math.sqrt( 1 - q.w * q.w );
-
 		if ( s < 0.0001 ) {
 
 			this.x = 1;
@@ -2513,10 +2451,6 @@ class Vector4 {
 		if ( ( Math.abs( m12 - m21 ) < epsilon ) &&
 		     ( Math.abs( m13 - m31 ) < epsilon ) &&
 		     ( Math.abs( m23 - m32 ) < epsilon ) ) {
-
-			// singularity found
-			// first check for identity matrix which must have +1 for all terms
-			// in leading diagonal and zero in other terms
 
 			if ( ( Math.abs( m12 + m21 ) < epsilon2 ) &&
 			     ( Math.abs( m13 + m31 ) < epsilon2 ) &&
@@ -2851,12 +2785,6 @@ class Vector4 {
 	}
 
 }
-
-/*
- In options, we can specify:
- * Texture parameters for an auto-generated target texture
- * depthBuffer/stencilBuffer: Booleans to indicate if we should generate these buffers
-*/
 class RenderTarget extends EventDispatcher {
 
 	constructor( width = 1, height = 1, options = {} ) {
@@ -3037,15 +2965,6 @@ class DataArrayTexture extends Texture$1 {
 class Data3DTexture extends Texture$1 {
 
 	constructor( data = null, width = 1, height = 1, depth = 1 ) {
-
-		// We're going to add .setXXX() methods for setting properties later.
-		// Users can still set in DataTexture3D directly.
-		//
-		//	const texture = new THREE.DataTexture3D( data, width, height, depth );
-		// 	texture.anisotropy = 16;
-		//
-		// See #14839
-
 		super( null );
 
 		this.isData3DTexture = true;
@@ -3266,11 +3185,6 @@ class Quaternion {
 	setFromEuler( euler, update = true ) {
 
 		const x = euler._x, y = euler._y, z = euler._z, order = euler._order;
-
-		// http://www.mathworks.com/matlabcentral/fileexchange/
-		// 	20696-function-to-convert-between-dcm-euler-angles-quaternions-and-euler-vectors/
-		//	content/SpinCalc.m
-
 		const cos = Math.cos;
 		const sin = Math.sin;
 
@@ -62951,7 +62865,99 @@ configuration or device capabilities');
          * Takes a URL to a USDZ file and sets the appropriate fields so that
          * Safari iOS can intent to their AR Quick Look.
          */
-        
+        async [$openIOSARQuickLook]() {
+            const generateUsdz = !this.iosSrc;
+            this[$arButtonContainer].classList.remove('enabled');
+            const objectURL = generateUsdz ? await this.prepareUSDZ() : this.iosSrc;
+            const modelUrl = new URL(objectURL, self.location.toString());
+            if (generateUsdz) {
+                const location = self.location.toString();
+                const locationUrl = new URL(location);
+                const srcUrl = new URL(this.src, locationUrl);
+                if (srcUrl.hash) {
+                    modelUrl.hash = srcUrl.hash;
+                }
+            }
+            if (this.arScale === 'fixed') {
+                if (modelUrl.hash) {
+                    modelUrl.hash += '&';
+                }
+                modelUrl.hash += 'allowsContentScaling=0';
+            }
+            const anchor = this[$arAnchor];
+            anchor.setAttribute('rel', 'ar');
+            const img = document.createElement('img');
+            anchor.appendChild(img);
+            anchor.setAttribute('href', modelUrl.toString());
+            if (generateUsdz) {
+                anchor.setAttribute('download', 'model.usdz');
+            }
+            // attach anchor to shadow DOM to ensure iOS16 ARQL banner click message
+            // event propagation
+            anchor.style.display = 'none';
+            if (!anchor.isConnected)
+                this.shadowRoot.appendChild(anchor);
+            console.log('Attempting to present in AR with Quick Look...');
+            anchor.click();
+            anchor.removeChild(img);
+            if (generateUsdz) {
+                URL.revokeObjectURL(objectURL);
+            }
+            this[$arButtonContainer].classList.add('enabled');
+        }
+        async prepareUSDZ() {
+            const updateSourceProgress = this[$progressTracker].beginActivity('usdz-conversion');
+            await this[$triggerLoad]();
+            const { model, shadow, target } = this[$scene];
+            if (model == null) {
+                return '';
+            }
+            let visible = false;
+            // Remove shadow from export
+            if (shadow != null) {
+                visible = shadow.visible;
+                shadow.visible = false;
+            }
+            updateSourceProgress(0.2);
+            const exporter = new USDZExporter();
+            target.remove(model);
+            model.position.copy(target.position);
+            model.updateWorldMatrix(false, true);
+            const arraybuffer = await exporter.parse(model);
+            model.position.set(0, 0, 0);
+            target.add(model);
+            const blob = new Blob([arraybuffer], {
+                type: 'model/vnd.usdz+zip',
+            });
+            const url = URL.createObjectURL(blob);
+            updateSourceProgress(1);
+            if (shadow != null) {
+                shadow.visible = visible;
+            }
+            return url;
+        }
+    }
+    __decorate$2([
+        n$8({ type: Boolean, attribute: 'ar' })
+    ], ARModelViewerElement.prototype, "ar", void 0);
+    __decorate$2([
+        n$8({ type: String, attribute: 'ar-scale' })
+    ], ARModelViewerElement.prototype, "arScale", void 0);
+    __decorate$2([
+        n$8({ type: String, attribute: 'ar-placement' })
+    ], ARModelViewerElement.prototype, "arPlacement", void 0);
+    __decorate$2([
+        n$8({ type: String, attribute: 'ar-modes' })
+    ], ARModelViewerElement.prototype, "arModes", void 0);
+    __decorate$2([
+        n$8({ type: String, attribute: 'ios-src' })
+    ], ARModelViewerElement.prototype, "iosSrc", void 0);
+    __decorate$2([
+        n$8({ type: Boolean, attribute: 'xr-environment' })
+    ], ARModelViewerElement.prototype, "xrEnvironment", void 0);
+    return ARModelViewerElement;
+};
+
 /* @license
  * Copyright 2019 Google LLC. All Rights Reserved.
  * Licensed under the Apache License, Version 2.0 (the 'License');
