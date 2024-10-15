@@ -1,87 +1,101 @@
+<!--
+    index.html 
+
+    This file make for learning work with th USDZ inside of the 
+    Safari web browser.
+
+    The most important references available inside of the 
+    https://webkit.org/blog/
+-->
 <!DOCTYPE html>
-<html lang="en">
+<html>
+
 <head>
-  <title>&lt;model-viewer&gt; Augmented Reality</title>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
-  <link rel="stylesheet" href="styles.css">
-
-  <!-- Load <model-viewer> scripts -->
-  <script type="module" src="model-viewer.js"></script>
-  <script nomodule src="https://unpkg.com/@google/model-viewer/dist/model-viewer-legacy.js"></script>
-  <script src="https://unpkg.com/@webcomponents/webcomponentsjs@2.1.3/webcomponents-loader.js"></script>
-  <script src="https://unpkg.com/intersection-observer@0.5.1/intersection-observer.js"></script>
-  <script src="https://unpkg.com/resize-observer-polyfill@1.5.1/dist/ResizeObserver.js"></script>
-
-  <style>
-    body {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      background-color: #f0f0f0;
-      padding: 20px;
-    }
-    model-viewer {
-      width: 100%;
-      max-width: 600px;
-      height: 400px;
-    }
-    button {
-      margin: 10px;
-      padding: 10px 20px;
-      font-size: 16px;
-      cursor: pointer;
-      border: none;
-      background-color: #007BFF;
-      color: white;
-      border-radius: 5px;
-    }
-    button:hover {
-      background-color: #0056b3;
-    }
-  </style>
+    <style>
+        .container {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        a {
+            text-decoration: none;
+            color: black;
+            font-size: medium;
+            margin-top: 20px;
+            margin-left: 10px;
+        }
+    </style>
 </head>
+
 <body>
-  <model-viewer 
-    src="assets/RocketShip_1393.gltf" 
-    ios-src="assets/RocketShip_1393.usdz"
-    ar
-    auto-rotate 
-    camera-controls 
-    shadow-intensity="1" 
-    alt="A 3D model of a rocket" 
-    background-color="#70BCD1">
-     <div>
-    <button type="button" onclick="launchAR()">View in AR</button>
-    <button type="button" onclick="exitAR()">Exit AR</button>
-    <button type="button" onclick="resetModel()">Reset Model</button>
-  </div>
-  </model-viewer>
+    <div class="container">
+        <h1>
+            Oh nice. Welcome back to Alireza.codes (Soltani) GH Page about Web AR
+        </h1>
+        <h2>Only in iOS</h2>
 
- 
-  
-  <script>
-    const modelViewer = document.querySelector('model-viewer');
+        <a rel="ar" href="assets/usds/heart.usdz">
+            <span>Tap to getting my heart!!!</span>
+        </a>
 
-    function launchAR() {
-      if (modelViewer && modelViewer.hasAttribute('ar')) {
-        modelViewer.enterAR();
-      } else {
-        alert('AR not supported on this device.');
+        <a rel="ar" href="assets/usds/chair_swan.usdz">
+            <span>Show Chair Swan</span>
+        </a>
+
+        <a rel="ar" href="assets/usds/flower_tulip.usdz">
+            <span>Show Flower tulip</span>
+        </a>
+
+        <a rel="ar" href="assets/usds/teapot.usdz">
+            <span>Show Teapot</span>
+        </a>
+
+        <h2>Only in Android</h2>
+        <a href="intent://arvr.google.com/scene-viewer/1.0?file=https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/Avocado/glTF/Avocado.gltf&mode=ar_only#Intent;scheme=https;package=com.google.ar.core;action=android.intent.action.VIEW;S.browser_fallback_url=https://developers.google.com/ar;end;">Avocado</a
+      >
+
+      <model-viewer
+        ar
+        ar-modes="scene-viewer webxr quick-look"
+        alt="A 3D model of an astronaut."
+        src="/assets/glTF/Duck.gltf"
+        >Click me to show the Duck</model-viewer
+      >
+    </div>
+    <script>
+      // Create Anchor link
+      const a = document.createElement("ar");
+
+      // Checking availability of AR inside of every HTML web page!
+      // Using `rel="ar"` to checking support of a section from the
+      // Web AR.
+      if (a.relList.support("ar")) {
+        window.alert("AR is available in this simple HTML");
       }
-    }
 
-    function exitAR() {
-      if (modelViewer && modelViewer.hasAttribute('ar')) {
-        modelViewer.exitAR();
-      }
-    }
+      // Android section
+      // Check whether this is an Android device that requested this view
+      const isAndroid = /android/i.test(navigator.userAgent);
+      // Fallback URL is used if the Google app is not installed and up to date.
+      // It's like some limit of Google Play Services on Huawei devices.
+      const fallbackUrl =
+        "https://arvr.google.com/scene-viewer?file=https%3A%2F%2Fstorage.googleapis.com%2Far-answers-in-search-models%2Fstatic%2FTiger%2Fmodel.glb&link=https%3A%2F%2Fgoogle.com&title=Tiger";
 
-    function resetModel() {
-      if (modelViewer) {
-        modelViewer.reset();
-      }
-    }
-  </script>
-</body>
+      // This intent URL trigger Scene Viewer on Android and falls back to
+      // fallbackURL if the Google app is not installed and up to date.
+      const sceneViewerUrl =
+        "intent://arvr.google.com/scene-viewer/1.0?file=https://storage.googleapis.com/ar-answers-in-search-models/static/Tiger/model.glb&title=Tiger#Intent;scheme=https;package=com.google.android.googlequicksearchbox;action=android.intent.action.VIEW;S.browser_fallback_url=" +
+        fallbackUrl +
+        ";end;";
+
+      // Create a link.
+      var aAndroid = document.createElement("a");
+      aAndroid.appendChild(document.createTextNode("Tiger"));
+      // Set the href to the intent URL on Android and the fallback URL
+      // everywhere else.
+      aAndroid.href = isAndroid ? sceneViewerUrl : fallbackUrl;
+      // Add the link to the page.
+      document.body.appendChild(aAndroid);
+    </script>
+  </body>
 </html>
