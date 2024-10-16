@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>AR with WebXR and AR Quick Look</title>
-  <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
+  <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.js"></script>
   <style>
     body, html {
       margin: 0;
@@ -46,7 +46,7 @@
     <!-- 3D model with AR functionality -->
     <model-viewer id="ar-model" 
       src="tree.glb"               
-      ios-src="assets/RocketShip_1393.usdz" <!-- Replace with your .usdz model path -->
+      ios-src="assets/RocketShip_1393.usdz"
       ar ar-modes="webxr quick-look"
       camera-controls
       shadow-intensity="1"
