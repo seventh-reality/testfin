@@ -34,23 +34,20 @@
             experienceToken: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjQ0NTk1LCJyb2xlIjoxLCJpYXQiOjE3MjgzNzQ3MjF9.guFa6KRD2yKrT3VWEk1jLJe6saRsf1Kop5HR1cZxqhw"  // <-- Add your experience token here
         };
 
-        const ox = new OnirixSDK(config);
-
-        // Load the SLAM tracking experience
-        ox.init()
+        // Initialize the Onirix SDK
+        Onirix.init(config)
             .then(() => {
                 console.log("Onirix SDK initialized");
 
                 // Create the WebAR viewer inside the container
-                const viewer = new OXWebARViewer({
+                const viewer = new Onirix.Viewer({
                     container: document.getElementById('webar-container')
                 });
 
                 // Start the SLAM tracking
-                ox.startSLAM({
+                Onirix.startSLAM({
                     onTrack: (event) => {
                         console.log('SLAM tracking event:', event);
-                        // You can customize what happens here when SLAM tracking is active
                     },
                     onError: (error) => {
                         console.error('SLAM error:', error);
