@@ -9,11 +9,14 @@
         canvas { display: block; }
     </style>
     <script src="https://cdn.jsdelivr.net/npm/three@0.152.0/build/three.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/three@0.152.0/examples/jsm/webxr/ARButton.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/three@0.152.0/examples/jsm/teleport/TeleportControls.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.152.0/examples/jsm/webxr/ARButton.js" type="module"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.152.0/examples/jsm/teleport/TeleportControls.js" type="module"></script>
 </head>
 <body>
-    <script>
+    <script type="module">
+        import { ARButton } from 'https://cdn.jsdelivr.net/npm/three@0.152.0/examples/jsm/webxr/ARButton.js';
+        import { TeleportControls } from 'https://cdn.jsdelivr.net/npm/three@0.152.0/examples/jsm/teleport/TeleportControls.js';
+
         let scene, camera, renderer, controller, hitTestSource, hitTestSourceAvailable;
         const tempMatrix = new THREE.Matrix4();
 
