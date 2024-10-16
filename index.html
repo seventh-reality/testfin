@@ -45,14 +45,15 @@
   <div id="ar-container">
     <!-- 3D model with AR functionality -->
     <model-viewer id="ar-model" 
-      src="tree.glb"              
-      ios-src="assets/RocketShip_1393.usdz"         
+      src="tree.glb"               <!-- Replace with your .glb model path -->
+      ios-src="tree.usdz"          <!-- Replace with your .usdz model path -->
       ar ar-modes="webxr scene-viewer quick-look"
       camera-controls
       shadow-intensity="1"
       alt="A 3D model of a tree"
       style="width: 100%; height: 400px;">
-      <button id="ar-button" class="ar-button" onclick="activateAR()">View in AR</button>
+      <!-- AR button inside model-viewer for iOS and Android -->
+      <button slot="ar-button" class="ar-button">View in AR</button>
     </model-viewer>
 
     <!-- Action buttons (visible before AR) -->
@@ -60,9 +61,6 @@
       <button class="action-button" onclick="scaleModel('up')">Scale Up</button>
       <button class="action-button" onclick="scaleModel('down')">Scale Down</button>
     </div>
-
-    <!-- AR button to activate AR mode -->
-    <button id="ar-button" class="ar-button" onclick="activateAR()">View in AR</button>
   </div>
 
   <script>
@@ -78,14 +76,7 @@
       }
     }
 
-    // Function to trigger AR mode
-    function activateAR() {
-      if (modelViewer.canActivateAR) {
-        modelViewer.activateAR();
-      } else {
-        alert('AR Quick Look or WebXR not supported on this device.');
-      }
-    }
+    // WebXR / AR Quick Look will be triggered based on platform support
   </script>
 </body>
 </html>
