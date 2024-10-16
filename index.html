@@ -3,24 +3,30 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>AR Quick Look with Model Viewer</title>
+  <title>AR with Buttons (Pre-AR Interaction)</title>
   <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
   <style>
     body, html {
       margin: 0;
-      overflow: hidden;
       height: 100%;
       display: flex;
       justify-content: center;
       align-items: center;
+      flex-direction: column;
+      font-family: Arial, sans-serif;
     }
     #ar-container {
       display: flex;
       flex-direction: column;
       align-items: center;
+      justify-content: center;
     }
-    #ar-button {
-      margin-top: 10px;
+    model-viewer {
+      width: 100%;
+      height: 400px;
+    }
+    .ar-button, .action-button {
+      margin: 10px;
       padding: 10px 20px;
       font-size: 16px;
       background-color: #4CAF50;
@@ -29,33 +35,51 @@
       border-radius: 5px;
       cursor: pointer;
     }
+    .action-buttons {
+      display: flex;
+      justify-content: center;
+    }
   </style>
 </head>
 <body>
   <div id="ar-container">
-    <!-- model-viewer for 3D and AR -->
+    <!-- 3D model with AR functionality -->
     <model-viewer id="ar-model" 
-      src="tree.glb"              <!-- Path to your .glb model -->
-      ios-src="tree.usdz"         <!-- Path to your .usdz model for AR Quick Look -->
+      src="tree.glb"              <!-- Replace with your .glb model path -->
+      ios-src="tree.usdz"         <!-- Replace with your .usdz model path -->
       ar ar-modes="webxr scene-viewer quick-look"
       camera-controls
-      alt="A 3D model of a tree"
       shadow-intensity="1"
-      style="width: 100%; height: 500px;">
+      alt="A 3D model of a tree"
+      style="width: 100%; height: 400px;">
     </model-viewer>
-    
-    <!-- Button to trigger AR mode -->
-    <button id="ar-button" onclick="activateAR()">View in AR</button>
+
+    <!-- Action buttons (visible before AR) -->
+    <div class="action-buttons">
+      <button class="action-button" onclick="scaleModel('up')">Scale Up</button>
+      <button class="action-button" onclick="scaleModel('down')">Scale Down</button>
+    </div>
+
+    <!-- AR button to activate AR mode -->
+    <button id="ar-button" class="ar-button" onclick="activateAR()">View in AR</button>
   </div>
 
   <script>
-    // Function to trigger AR mode on click
+    const modelViewer = document.querySelector('#ar-model');
+
+    // Function to scale the 3D model
+    function scaleModel(direction) {
+      const currentScale = modelViewer.scale.x; // Get current scale
+      if (direction === 'up') {
+        modelViewer.scale.set(currentScale + 0.1, currentScale + 0.1, currentScale + 0.1);
+      } else if (direction === 'down') {
+        modelViewer.scale.set(Math.max(currentScale - 0.1, 0.1), Math.max(currentScale - 0.1, 0.1), Math.max(currentScale - 0.1, 0.1));
+      }
+    }
+
+    // Function to trigger AR mode
     function activateAR() {
-      const modelViewer = document.querySelector('#ar-model');
-      
-      const supportsARQuickLook = modelViewer.canActivateAR;
-      if (supportsARQuickLook) {
-        // Trigger AR on supported devices (Quick Look on iOS or Scene Viewer on Android)
+      if (modelViewer.canActivateAR) {
         modelViewer.activateAR();
       } else {
         alert('AR Quick Look or WebXR not supported on this device.');
