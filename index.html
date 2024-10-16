@@ -3,41 +3,125 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>AR Surface Tracking</title>
-  <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
-  <script src="https://cdn.rawgit.com/jeromeetienne/ar.js/1.7.2/aframe/build/aframe-ar.min.js"></script>
+  <title>WebAR with SLAM-like Surface Tracking</title>
+  <style>
+    body, html {
+      margin: 0;
+      overflow: hidden;
+      height: 100%;
+    }
+    #ar-container {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+    }
+  </style>
 </head>
-<body style="margin: 0; overflow: hidden;">
-  <!-- Scene for AR -->
-  <a-scene embedded arjs="sourceType: webcam; debugUIEnabled: false;">
-    
-    <!-- Add a camera for AR -->
-    <a-entity camera position="0 0 0" look-controls></a-entity>
+<body>
+  <div id="ar-container"></div>
 
-    <!-- Plane detection: Add a model when a surface is found -->
-    <a-entity id="model" gltf-model="url(tree.glb)" scale="0.5 0.5 0.5" position="0 0 0">
-      <!-- Interactive controls can be added here -->
-    </a-entity>
+  <script type="module">
+    import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.132.2/build/three.module.js';
+    import { GLTFLoader } from 'https://cdn.jsdelivr.net/npm/three@0.132.2/examples/jsm/loaders/GLTFLoader.js';
 
-  </a-scene>
+    let scene, camera, renderer;
+    let controller;
+    let reticle;
+    let hitTestSource = null;
+    let hitTestSourceRequested = false;
 
-  <!-- Script to handle basic surface tracking -->
-  <script>
-    // This script detects surfaces and updates the position of the model.
-    const sceneEl = document.querySelector('a-scene');
-    const modelEl = document.querySelector('#model');
+    function init() {
+      const container = document.getElementById('ar-container');
 
-    // Track when surfaces are detected
-    sceneEl.addEventListener('arReady', () => {
-      console.log('AR is ready!');
+      // Create scene
+      scene = new THREE.Scene();
+
+      // Create camera
+      camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.01, 20);
+
+      // Create renderer
+      renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      renderer.xr.enabled = true;
+      container.appendChild(renderer.domElement);
+
+      // Create a light
+      const light = new THREE.HemisphereLight(0xffffff, 0xbbbbff, 1);
+      scene.add(light);
+
+      // Load .glb model
+      const loader = new GLTFLoader();
+      loader.load('tree.glb', (gltf) => {
+        gltf.scene.scale.set(0.1, 0.1, 0.1); // Adjust size of the model
+        gltf.scene.position.set(0, 0, -2); // Set initial position
+        scene.add(gltf.scene);
+      });
+
+      // Reticle for AR surface detection
+      reticle = new THREE.Mesh(
+        new THREE.RingGeometry(0.1, 0.11, 32),
+        new THREE.MeshBasicMaterial({ color: 0xffffff })
+      );
+      reticle.rotation.x = - Math.PI / 2;
+      reticle.matrixAutoUpdate = false;
+      reticle.visible = false;
+      scene.add(reticle);
+
+      // AR session
+      document.body.addEventListener('click', () => {
+        if (!hitTestSourceRequested) {
+          renderer.xr.getSession().requestReferenceSpace('viewer').then((referenceSpace) => {
+            renderer.xr.getSession().requestHitTestSource({ space: referenceSpace }).then((source) => {
+              hitTestSource = source;
+            });
+          });
+          hitTestSourceRequested = true;
+        }
+      });
+
+      // Animate loop
+      renderer.setAnimationLoop(render);
+    }
+
+    function render(timestamp, frame) {
+      if (frame) {
+        const referenceSpace = renderer.xr.getReferenceSpace();
+        const session = renderer.xr.getSession();
+
+        if (hitTestSource) {
+          const hitTestResults = frame.getHitTestResults(hitTestSource);
+
+          if (hitTestResults.length) {
+            const hit = hitTestResults[0];
+            const hitPose = hit.getPose(referenceSpace);
+
+            reticle.visible = true;
+            reticle.matrix.fromArray(hitPose.transform.matrix);
+          } else {
+            reticle.visible = false;
+          }
+        }
+      }
+
+      renderer.render(scene, camera);
+    }
+
+    // WebXR activation
+    document.body.addEventListener('click', () => {
+      if (navigator.xr) {
+        navigator.xr.requestSession('immersive-ar', {
+          requiredFeatures: ['hit-test']
+        }).then((session) => {
+          renderer.xr.setSession(session);
+        });
+      } else {
+        alert('WebXR not supported on this device');
+      }
     });
 
-    sceneEl.addEventListener('arError', (event) => {
-      console.error('Error in AR setup:', event);
-    });
-
-    // You can customize logic to update the model's position based on surface detection
-
+    init();
   </script>
 </body>
 </html>
