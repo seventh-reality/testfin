@@ -10,14 +10,13 @@
     </style>
     <script src="https://cdn.jsdelivr.net/npm/three@0.152.0/build/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.152.0/examples/jsm/webxr/ARButton.js" type="module"></script>
-    <script src="https://cdn.jsdelivr.net/npm/three@0.152.0/examples/jsm/teleport/TeleportControls.js" type="module"></script>
+    <!-- Removed TeleportControls.js as it does not exist on the CDN -->
 </head>
 <body>
     <script type="module">
         import { ARButton } from 'https://cdn.jsdelivr.net/npm/three@0.152.0/examples/jsm/webxr/ARButton.js';
-        import { TeleportControls } from 'https://cdn.jsdelivr.net/npm/three@0.152.0/examples/jsm/teleport/TeleportControls.js';
 
-        let scene, camera, renderer, controller, hitTestSource, hitTestSourceAvailable;
+        let scene, camera, renderer, controller;
         const tempMatrix = new THREE.Matrix4();
 
         // Initialize scene
@@ -42,20 +41,6 @@
             controller = renderer.xr.getController(0);
             scene.add(controller);
 
-            // Add hit test source
-            renderer.xr.addEventListener('sessionstart', () => {
-                navigator.xr.requestHitTestSource({ space: controller.targetRaySpace })
-                    .then(source => {
-                        hitTestSource = source;
-                        hitTestSourceAvailable = true;
-                    });
-            });
-
-            renderer.xr.addEventListener('sessionend', () => {
-                hitTestSource = null;
-                hitTestSourceAvailable = false;
-            });
-
             // Add AR button to start the session
             document.body.appendChild(ARButton.createButton(renderer));
             window.addEventListener('resize', onWindowResize, false);
@@ -72,25 +57,6 @@
         }
 
         function render() {
-            if (hitTestSourceAvailable) {
-                const session = renderer.xr.getSession();
-                const referenceSpace = session.referenceSpace;
-                const hitTestResults = session.requestHitTestSourceForTransientInput({ targetRaySpace: controller.targetRaySpace });
-
-                hitTestResults.then(hitTestResult => {
-                    if (hitTestResult) {
-                        const hitPose = hitTestResult.hitPose;
-                        if (hitPose) {
-                            const hitMatrix = new THREE.Matrix4().fromArray(hitPose.transform.matrix);
-                            tempMatrix.identity().extractRotation(hitMatrix);
-                            const position = new THREE.Vector3().setFromMatrixPosition(hitMatrix);
-                            controller.position.copy(position);
-                            controller.rotation.setFromRotationMatrix(tempMatrix);
-                        }
-                    }
-                });
-            }
-
             renderer.render(scene, camera);
         }
 
