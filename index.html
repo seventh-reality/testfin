@@ -10,6 +10,7 @@
         #info { position: absolute; top: 10px; left: 10px; color: white; }
     </style>
     <script type="module">
+        // Use the latest CDN links for Three.js and its modules
         import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.146.0/build/three.module.js';
         import { ARButton } from 'https://cdn.jsdelivr.net/npm/three@0.146.0/examples/jsm/webxr/ARButton.js';
         import { GLTFLoader } from 'https://cdn.jsdelivr.net/npm/three@0.146.0/examples/jsm/loaders/GLTFLoader.js';
@@ -36,7 +37,7 @@
             // Load a GLTF model
             const loader = new GLTFLoader();
             model = await loader.loadAsync('tree.glb'); // Replace with your model path
-            model.scene.scale.set(0.1, 0.1, 0.1);
+            model.scene.scale.set(0.1, 0.1, 0.1); // Adjust scale
             model.scene.position.set(0, 0, -1); // Adjust position
 
             // Add the model to the scene
@@ -63,7 +64,7 @@
             if (intersections.length > 0) {
                 const intersection = intersections[0];
                 // You can add your interaction logic here, e.g., placing a model
-                const object = model.clone();
+                const object = model.scene.clone();
                 object.position.copy(intersection.point);
                 scene.add(object);
             }
@@ -75,10 +76,7 @@
 
         function getIntersections(controller) {
             const tempMatrix = new THREE.Matrix4();
-            const userData = controller.userData;
-            if (userData && userData.hand) {
-                tempMatrix.identity().extractRotation(controller.matrixWorld);
-            }
+            tempMatrix.identity().extractRotation(controller.matrixWorld);
 
             const raycaster = new THREE.Raycaster();
             raycaster.ray.direction.set(0, 0, -1).applyMatrix4(tempMatrix);
