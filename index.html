@@ -3,72 +3,92 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WebXR AR with Three.js</title>
+    <title>Onirix SLAM WebAR</title>
+
+    <!-- Load the Onirix WebAR Library -->
+    <script src="https://cdn.onirix.com/webar-latest.js"></script>
+
     <style>
-        body { margin: 0; }
-        canvas { display: block; }
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            overflow: hidden;
+        }
+        #webar-container {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
     </style>
-    <script src="https://cdn.jsdelivr.net/npm/three@0.152.0/build/three.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/three@0.152.0/examples/jsm/webxr/ARButton.js" type="module"></script>
 </head>
 <body>
-    <script type="module">
-        import { ARButton } from 'https://cdn.jsdelivr.net/npm/three@0.152.0/examples/jsm/webxr/ARButton.js';
+    <div id="webar-container"></div>
 
-        let scene, camera, renderer, controller;
-        const tempMatrix = new THREE.Matrix4();
+    <script>
+        // Initialize Onirix WebAR with API Token and Experience Token
+        const config = {
+            apiToken: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjQ0NTk1LCJwcm9qZWN0SWQiOjkwNDg2LCJyb2xlIjozLCJpYXQiOjE3MjgzNzU2NTl9.W1IIeF-2_kytckH7P6NiCFDadKF52k-f_lNP4fvB3rM",  // <-- Add your API token here
+            experienceToken: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjQ0NTk1LCJyb2xlIjoxLCJpYXQiOjE3MjgzNzQ3MjF9.guFa6KRD2yKrT3VWEk1jLJe6saRsf1Kop5HR1cZxqhw"  // <-- Add your experience token here
+        };
 
-        // Check for WebXR support
-        if (!navigator.xr) {
-            alert("WebXR is not available in this browser.");
-        }
+        const ox = new OnirixSDK(config);
 
-        // Initialize scene
-        function init() {
-            scene = new THREE.Scene();
-            camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-            renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
-            renderer.setSize(window.innerWidth, window.innerHeight);
-            renderer.xr.enabled = true;
+        // Load the SLAM tracking experience
+        ox.init()
+            .then(() => {
+                console.log("Onirix SDK initialized");
 
-            // Append renderer to the body
-            document.body.appendChild(renderer.domElement);
+                // Create the WebAR viewer inside the container
+                const viewer = new OXWebARViewer({
+                    container: document.getElementById('webar-container')
+                });
 
-            const light = new THREE.AmbientLight(0xffffff, 1);
-            scene.add(light);
+                // Start the SLAM tracking
+                ox.startSLAM({
+                    onTrack: (event) => {
+                        console.log('SLAM tracking event:', event);
+                        // You can customize what happens here when SLAM tracking is active
+                    },
+                    onError: (error) => {
+                        console.error('SLAM error:', error);
+                    }
+                });
 
-            // Add a simple box as our AR object
-            const geometry = new THREE.BoxGeometry(0.1, 0.1, 0.1);
-            const material = new THREE.MeshNormalMaterial();
-            const cube = new THREE.Mesh(geometry, material);
-            scene.add(cube);
+                // Start the rendering loop for AR content
+                viewer.startRenderLoop();
 
-            // Set up controller
-            controller = renderer.xr.getController(0);
-            scene.add(controller);
+                // Add interaction to place .glb model on surface tap
+                viewer.addEventListener('click', function (event) {
+                    // Perform hit test to detect surfaces
+                    viewer.hitTest(event.clientX, event.clientY).then((hits) => {
+                        if (hits.length > 0) {
+                            // Get the first hit result
+                            const hit = hits[0];
 
-            // Add AR button to start the session
-            document.body.appendChild(ARButton.createButton(renderer));
+                            // Load a .glb model at the hit position
+                            viewer.loadGLTFModel({
+                                url: "tree.glb", // <-- Add your .glb model URL here
+                                position: hit.position, // Position where the model should be placed
+                                scale: [1, 1, 1], // Adjust the model scale if needed
+                                rotation: [0, 0, 0] // Adjust rotation if needed
+                            }).then((model) => {
+                                console.log("Model loaded at position:", hit.position);
+                            }).catch((error) => {
+                                console.error("Error loading model:", error);
+                            });
+                        }
+                    }).catch((error) => {
+                        console.error('Hit test error:', error);
+                    });
+                });
 
-            window.addEventListener('resize', onWindowResize, false);
-        }
-
-        function onWindowResize() {
-            camera.aspect = window.innerWidth / window.innerHeight;
-            camera.updateProjectionMatrix();
-            renderer.setSize(window.innerWidth, window.innerHeight);
-        }
-
-        function animate() {
-            renderer.setAnimationLoop(render);
-        }
-
-        function render() {
-            renderer.render(scene, camera);
-        }
-
-        init();
-        animate();
+            })
+            .catch((error) => {
+                console.error("Onirix SDK initialization error:", error);
+            });
     </script>
 </body>
 </html>
