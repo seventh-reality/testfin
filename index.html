@@ -10,7 +10,6 @@
     </style>
     <script src="https://cdn.jsdelivr.net/npm/three@0.152.0/build/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.152.0/examples/jsm/webxr/ARButton.js" type="module"></script>
-    <!-- Removed TeleportControls.js as it does not exist on the CDN -->
 </head>
 <body>
     <script type="module">
@@ -19,6 +18,11 @@
         let scene, camera, renderer, controller;
         const tempMatrix = new THREE.Matrix4();
 
+        // Check for WebXR support
+        if (!navigator.xr) {
+            alert("WebXR is not available in this browser.");
+        }
+
         // Initialize scene
         function init() {
             scene = new THREE.Scene();
@@ -26,6 +30,8 @@
             renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
             renderer.setSize(window.innerWidth, window.innerHeight);
             renderer.xr.enabled = true;
+
+            // Append renderer to the body
             document.body.appendChild(renderer.domElement);
 
             const light = new THREE.AmbientLight(0xffffff, 1);
@@ -43,6 +49,7 @@
 
             // Add AR button to start the session
             document.body.appendChild(ARButton.createButton(renderer));
+
             window.addEventListener('resize', onWindowResize, false);
         }
 
