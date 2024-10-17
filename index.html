@@ -3,89 +3,62 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Onirix SLAM WebAR</title>
-
-    <!-- Load the Onirix WebAR Library -->
-    <script src="https://cdn.onirix.com/webar-latest.js"></script>
-
+    <title>Onirix SLAM Tracking</title>
+    <script src="https://cdn.onirix.com/onirix-sdk.js"></script>
     <style>
-        body, html {
+        body {
             margin: 0;
-            padding: 0;
-            height: 100%;
             overflow: hidden;
         }
-        #webar-container {
-            width: 100%;
-            height: 100%;
-            position: absolute;
-            top: 0;
-            left: 0;
+        #onirix-container {
+            width: 100vw;
+            height: 100vh;
         }
     </style>
 </head>
 <body>
-    <div id="webar-container"></div>
+    <div id="onirix-container"></div>
 
     <script>
-        // Initialize Onirix WebAR with API Token and Experience Token
-        const config = {
-            apiToken: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjQ0NTk1LCJwcm9qZWN0SWQiOjkwNDg2LCJyb2xlIjozLCJpYXQiOjE3MjgzNzU2NTl9.W1IIeF-2_kytckH7P6NiCFDadKF52k-f_lNP4fvB3rM",  // <-- Add your API token here
-            experienceToken: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjQ0NTk1LCJyb2xlIjoxLCJpYXQiOjE3MjgzNzQ3MjF9.guFa6KRD2yKrT3VWEk1jLJe6saRsf1Kop5HR1cZxqhw"  // <-- Add your experience token here
-        };
+        // Initialize Onirix SDK
+        const onirix = new Onirix({
+            apiKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjUyMDIsInByb2plY3RJZCI6MTQ0MjgsInJvbGUiOjMsImlhdCI6MTYxNjc1ODY5NX0.8F5eAPcBGaHzSSLuQAEgpdja9aEZ6Ca_Ll9wg84Rp5k', // Replace with your API key
+            containerId: 'onirix-container', // Your HTML container ID
+        });
 
-        // Initialize the Onirix SDK
-        Onirix.init(config)
+        // Initialize the scene
+        const scene = new Onirix.Scene();
+
+        // Load the GLB model
+        const model = new Onirix.GLBModel('tree.glb'); // Replace with your GLB model path
+        scene.add(model);
+
+        // Enable surface mesh for tracking
+        const surfaceMesh = new Onirix.MeshCollider(model);
+        scene.add(surfaceMesh);
+
+        // Handle hit events on the mesh
+        surfaceMesh.on('hit', () => {
+            console.log('Mesh hit detected!');
+            // Add your logic here for what happens on hit
+            alert('Mesh has been hit!');
+        });
+
+        // Start the Onirix SLAM tracking
+        onirix.start(scene)
             .then(() => {
-                console.log("Onirix SDK initialized");
-
-                // Create the WebAR viewer inside the container
-                const viewer = new Onirix.Viewer({
-                    container: document.getElementById('webar-container')
-                });
-
-                // Start the SLAM tracking
-                Onirix.startSLAM({
-                    onTrack: (event) => {
-                        console.log('SLAM tracking event:', event);
-                    },
-                    onError: (error) => {
-                        console.error('SLAM error:', error);
-                    }
-                });
-
-                // Start the rendering loop for AR content
-                viewer.startRenderLoop();
-
-                // Add interaction to place .glb model on surface tap
-                viewer.addEventListener('click', function (event) {
-                    // Perform hit test to detect surfaces
-                    viewer.hitTest(event.clientX, event.clientY).then((hits) => {
-                        if (hits.length > 0) {
-                            // Get the first hit result
-                            const hit = hits[0];
-
-                            // Load a .glb model at the hit position
-                            viewer.loadGLTFModel({
-                                url: "tree.glb", // <-- Add your .glb model URL here
-                                position: hit.position, // Position where the model should be placed
-                                scale: [1, 1, 1], // Adjust the model scale if needed
-                                rotation: [0, 0, 0] // Adjust rotation if needed
-                            }).then((model) => {
-                                console.log("Model loaded at position:", hit.position);
-                            }).catch((error) => {
-                                console.error("Error loading model:", error);
-                            });
-                        }
-                    }).catch((error) => {
-                        console.error('Hit test error:', error);
-                    });
-                });
-
+                console.log('SLAM tracking started');
             })
             .catch((error) => {
-                console.error("Onirix SDK initialization error:", error);
+                console.error('Error starting SLAM tracking:', error);
             });
+
+        // Update loop
+        function update() {
+            scene.update(); // Update the scene
+            requestAnimationFrame(update); // Request the next frame
+        }
+        update();
     </script>
 </body>
 </html>
